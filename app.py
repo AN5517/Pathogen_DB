@@ -218,23 +218,23 @@ def get_high_risk_pathogens(threshold):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/labs_by_pathogen_type/<pathogen_type>')
-def get_labs_by_pathogen_type(pathogen_type):
-    conn = get_db_connection()
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
+# @app.route('/api/labs_by_pathogen_type/<pathogen_type>')
+# def get_labs_by_pathogen_type(pathogen_type):
+#     conn = get_db_connection()
+#     cursor = conn.cursor(pymysql.cursors.DictCursor)
     
-    cursor.execute("""
-        SELECT DISTINCT rl.lab_id, rl.name, rl.total_funding, c.name as country
-        FROM Research_lab rl
-        JOIN Research_focus rf ON rl.lab_id = rf.lab_id
-        JOIN Pathogen p ON rf.pathogen_id = p.id
-        JOIN Country c ON rl.location = c.country_id
-        WHERE p.type = %s
-    """, (pathogen_type,))
+#     cursor.execute("""
+#         SELECT DISTINCT rl.lab_id, rl.name, rl.total_funding, c.name as country
+#         FROM Research_lab rl
+#         JOIN Research_focus rf ON rl.lab_id = rf.lab_id
+#         JOIN Pathogen p ON rf.pathogen_id = p.id
+#         JOIN Country c ON rl.location = c.country_id
+#         WHERE p.type = %s
+#     """, (pathogen_type,))
     
-    result = cursor.fetchall()
-    conn.close()
-    return jsonify(result)
+#     result = cursor.fetchall()
+#     conn.close()
+#     return jsonify(result)
 
 @app.route('/api/vaccine_distribution_stats')
 def get_vaccine_distribution_stats():

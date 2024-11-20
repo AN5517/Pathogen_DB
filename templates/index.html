@@ -1,267 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pathogen Research Dashboard</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
+    <link rel="icon" href="/static/world.svg" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
     <div class="container">
-        <h1>Pathogen Research Dashboard</h1>
-        
-        <div class="grid">
-            <div class="card operation-card" id="insert-tile" onclick="openModal('insert-modal')">
-                <h2>Insert Data</h2>
-                <p>Add new records to database tables</p>
-            </div>
+      <h1>Pathogen Research Dashboard</h1>
 
-            <div class="card operation-card" id="update-tile" onclick="openModal('update-modal')">
-                <h2>Update Data</h2>
-                <p>Modify existing records</p>
-            </div>
-
-            <div class="card operation-card" id="delete-tile" onclick="openModal('delete-modal')">
-                <h2>Delete Data</h2>
-                <p>Remove records from database</p>
-            </div>
-
-            <div class="card operation-card center-align" id="analysis-tile" onclick="openModal('analysis-modal')">
-                <h2>Analysis</h2>
-                <p>View analytical reports and statistics</p>
-            </div>
-
-            <div class="card operation-card center-align" id="view-tile" onclick="openModal('read-modal')">
-                <h2>View Data</h2>
-                <p>Browse table contents</p>
-            </div>
-
-            <!-- New Tiles -->
-            <div class="card operation-card" id="selection-tile" onclick="openModal('selection-modal')">
-                <h2>Selection</h2>
-                <p>Select rows based on conditions</p>
-            </div>
-
-            <div class="card operation-card" id="projection-tile" onclick="openModal('projection-modal')">
-                <h2>Projection</h2>
-                <p>Select specific columns</p>
-            </div>
-
-            <div class="card operation-card" id="aggregation-tile" onclick="openModal('aggregation-modal')">
-                <h2>Aggregation</h2>
-                <p>Calculate aggregate values</p>
-            </div>
-
-            <div class="card operation-card" id="search-tile" onclick="openModal('search-modal')">
-                <h2>Search</h2>
-                <p>Find rows using pattern matching</p>
-            </div>
+      <div class="grid">
+        <div
+          class="card operation-card"
+          id="insert-tile"
+          onclick="openModal('insert-modal')"
+        >
+          <h2>Insert Data</h2>
+          <p>Add new records to database tables</p>
         </div>
 
-        <!-- Insert Modal -->
-        <div id="insert-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('insert-modal')">&times;</span>
-                <h2>Insert Data</h2>
-                <div class="form-group">
-                    <label for="insert-table">Select Table:</label>
-                    <select id="insert-table" onchange="loadTableForm('insert')">
-                        <option value="">Select a table...</option>
-                    </select>
-                </div>
-                <div id="insert-form-container" class="form-container"></div>
-            </div>
+        <div
+          class="card operation-card"
+          id="update-tile"
+          onclick="openModal('update-modal')"
+        >
+          <h2>Update Data</h2>
+          <p>Modify existing records</p>
         </div>
 
-        <!-- Update Modal -->
-        <div id="update-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('update-modal')">&times;</span>
-                <h2>Update Data</h2>
-                <div class="form-group">
-                    <label for="update-table">Select Table:</label>
-                    <select id="update-table" onchange="loadTableForm('update')">
-                        <option value="">Select a table...</option>
-                    </select>
-                </div>
-                <div id="update-form-container" class="form-container"></div>
-            </div>
+        <div
+          class="card operation-card"
+          id="delete-tile"
+          onclick="openModal('delete-modal')"
+        >
+          <h2>Delete Data</h2>
+          <p>Remove records from database</p>
         </div>
 
-        <!-- Delete Modal -->
-        <div id="delete-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('delete-modal')">&times;</span>
-                <h2>Delete Data</h2>
-                <div class="form-group">
-                    <label for="delete-table">Select Table:</label>
-                    <select id="delete-table" onchange="loadTableForm('delete')">
-                        <option value="">Select a table...</option>
-                    </select>
-                </div>
-                <div id="delete-form-container" class="form-container"></div>
-            </div>
+        <div
+          class="card operation-card center-align"
+          id="analysis-tile"
+          onclick="openModal('analysis-modal')"
+        >
+          <h2>Analysis</h2>
+          <p>View analytical reports and statistics</p>
         </div>
 
-        <!-- Analysis Modal -->
-        <div id="analysis-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('analysis-modal')">&times;</span>
-                <h2>Analysis Options</h2>
-                <div class="analysis-options">
-                    <div class="card" onclick="loadAnalysis('high-risk')">
-                        <h3>High Risk Pathogens</h3>
-                        <p>View pathogens with high mutation probability</p>
-                    </div>
-                    <div class="card" onclick="loadAnalysis('research-labs')">
+        <div
+          class="card operation-card center-align"
+          id="view-tile"
+          onclick="openModal('read-modal')"
+        >
+          <h2>View Data</h2>
+          <p>Browse table contents</p>
+        </div>
+
+        <!-- New Tiles -->
+        <div
+          class="card operation-card"
+          id="selection-tile"
+          onclick="openModal('selection-modal')"
+        >
+          <h2>Selection</h2>
+          <p>Select rows based on conditions</p>
+        </div>
+
+        <div
+          class="card operation-card"
+          id="projection-tile"
+          onclick="openModal('projection-modal')"
+        >
+          <h2>Projection</h2>
+          <p>Select specific columns</p>
+        </div>
+
+        <div
+          class="card operation-card"
+          id="aggregation-tile"
+          onclick="openModal('aggregation-modal')"
+        >
+          <h2>Aggregation</h2>
+          <p>Calculate aggregate values</p>
+        </div>
+
+        <div
+          class="card operation-card"
+          id="search-tile"
+          onclick="openModal('search-modal')"
+        >
+          <h2>Search</h2>
+          <p>Find rows using pattern matching</p>
+        </div>
+      </div>
+
+      <!-- Insert Modal -->
+      <div id="insert-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('insert-modal')"
+            >&times;</span
+          >
+          <h2>Insert Data</h2>
+          <div class="form-group">
+            <label for="insert-table">Select Table:</label>
+            <select id="insert-table" onchange="loadTableForm('insert')">
+              <option value="">Select a table...</option>
+            </select>
+          </div>
+          <div id="insert-form-container" class="form-container"></div>
+        </div>
+      </div>
+
+      <!-- Update Modal -->
+      <div id="update-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('update-modal')"
+            >&times;</span
+          >
+          <h2>Update Data</h2>
+          <div class="form-group">
+            <label for="update-table">Select Table:</label>
+            <select id="update-table" onchange="loadTableForm('update')">
+              <option value="">Select a table...</option>
+            </select>
+          </div>
+          <div id="update-form-container" class="form-container"></div>
+        </div>
+      </div>
+
+      <!-- Delete Modal -->
+      <div id="delete-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('delete-modal')"
+            >&times;</span
+          >
+          <h2>Delete Data</h2>
+          <div class="form-group">
+            <label for="delete-table">Select Table:</label>
+            <select id="delete-table" onchange="loadTableForm('delete')">
+              <option value="">Select a table...</option>
+            </select>
+          </div>
+          <div id="delete-form-container" class="form-container"></div>
+        </div>
+      </div>
+
+      <!-- Analysis Modal -->
+      <div id="analysis-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('analysis-modal')"
+            >&times;</span
+          >
+          <h2>Analysis Options</h2>
+          <div class="analysis-options">
+            <div class="card" onclick="loadAnalysis('high-risk')">
+              <h3>High Risk Pathogens</h3>
+              <p>View pathogens with high mutation probability</p>
+            </div>
+            <!-- <div class="card" onclick="loadAnalysis('research-labs')">
                         <h3>Research Labs Analysis</h3>
                         <p>View labs by pathogen type</p>
-                    </div>
-                    <div class="card" onclick="loadAnalysis('vaccine-distribution')">
-                        <h3>Vaccine Distribution</h3>
-                        <p>Global distribution statistics</p>
-                    </div>
-                    <div class="card" onclick="loadAnalysis('mutation-impact')">
-                        <h3>Mutation Impact</h3>
-                        <p>Historical mutation data analysis</p>
-                    </div>
-                    <div class="card" onclick="loadAnalysis('project-success')">
-                        <h3>Project Success</h3>
-                        <p>Research project metrics</p>
-                    </div>
-                </div>
-                <div id="analysis-results" class="table-container"></div>
+                    </div> -->
+            <div class="card" onclick="loadAnalysis('vaccine-distribution')">
+              <h3>Vaccine Distribution</h3>
+              <p>Global distribution statistics</p>
             </div>
+            <div class="card" onclick="loadAnalysis('mutation-impact')">
+              <h3>Mutation Impact</h3>
+              <p>Historical mutation data analysis</p>
+            </div>
+            <div class="card" onclick="loadAnalysis('project-success')">
+              <h3>Project Success</h3>
+              <p>Research project metrics</p>
+            </div>
+          </div>
+          <div id="analysis-results" class="table-container"></div>
         </div>
+      </div>
 
-        <!-- Read Modal -->
-        <div id="read-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('read-modal')">&times;</span>
-                <h2>View Table Data</h2>
-                <div class="form-group">
-                    <label for="read-table">Select Table:</label>
-                    <select id="read-table" onchange="fetchTableData(this.value)">
-                        <option value="">Select a table...</option>
-                    </select>
-                </div>
-                <div id="readTableContainer" class="table-container"></div>
-            </div>
+      <!-- Read Modal -->
+      <div id="read-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('read-modal')">&times;</span>
+          <h2>View Table Data</h2>
+          <div class="form-group">
+            <label for="read-table">Select Table:</label>
+            <select id="read-table" onchange="fetchTableData(this.value)">
+              <option value="">Select a table...</option>
+            </select>
+          </div>
+          <div id="readTableContainer" class="table-container"></div>
         </div>
+      </div>
 
-        <!-- Selection Modal -->
-        <div id="selection-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('selection-modal')">&times;</span>
-                <h2>Selection Operation</h2>
-                <div class="form-group">
-                    <label for="selection-table">Select Table:</label>
-                    <select id="selection-table" onchange="loadSelectionOptions(this.value)">
-                        <option value="">Choose a table</option>
-                        <!-- Tables will be populated dynamically -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="selection-column">Select Column:</label>
-                    <select id="selection-column">
-                        <!-- Columns will be populated dynamically -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="selection-condition">Condition:</label>
-                    <select id="selection-condition">
-                        <option value="=">=</option>
-                        <option value=">">&gt;</option>
-                        <option value="<">&lt;</option>
-                        <option value=">=">&gt;=</option>
-                        <option value="<=">&lt;=</option>
-                        <option value="!=">!=</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="selection-value">Value:</label>
-                    <input type="text" id="selection-value">
-                </div>
-                <div id="selection-results" class="table-container"></div>
-                <button onclick="performSelection()">Execute Selection</button>
-            </div>
+      <!-- Selection Modal -->
+      <div id="selection-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('selection-modal')"
+            >&times;</span
+          >
+          <h2>Selection Operation</h2>
+          <div class="form-group">
+            <label for="selection-table">Select Table:</label>
+            <select
+              id="selection-table"
+              onchange="loadSelectionOptions(this.value)"
+            >
+              <option value="">Choose a table</option>
+              <!-- Tables will be populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="selection-column">Select Column:</label>
+            <select id="selection-column">
+              <!-- Columns will be populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="selection-condition">Condition:</label>
+            <select id="selection-condition">
+              <option value="=">=</option>
+              <option value=">">&gt;</option>
+              <option value="<">&lt;</option>
+              <option value=">=">&gt;=</option>
+              <option value="<=">&lt;=</option>
+              <option value="!=">!=</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="selection-value">Value:</label>
+            <input type="text" id="selection-value" />
+          </div>
+          <div id="selection-results" class="table-container"></div>
+          <button onclick="performSelection()">Execute Selection</button>
         </div>
+      </div>
 
-        <!-- Projection Modal -->
-        <div id="projection-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('projection-modal')">&times;</span>
-                <h2>Projection Operation</h2>
-                <div class="form-group">
-                    <label for="projection-table">Select Table:</label>
-                    <select id="projection-table" onchange="loadProjectionColumns(this.value)">
-                        <option value="">Choose a table</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Select Columns:</label>
-                    <div id="projection-columns"></div>
-                </div>
-                <div id="projection-results" class="table-container"></div>
-                <button onclick="performProjection()">Execute Projection</button>
-            </div>
+      <!-- Projection Modal -->
+      <div id="projection-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('projection-modal')"
+            >&times;</span
+          >
+          <h2>Projection Operation</h2>
+          <div class="form-group">
+            <label for="projection-table">Select Table:</label>
+            <select
+              id="projection-table"
+              onchange="loadProjectionColumns(this.value)"
+            >
+              <option value="">Choose a table</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Select Columns:</label>
+            <div id="projection-columns"></div>
+          </div>
+          <div id="projection-results" class="table-container"></div>
+          <button onclick="performProjection()">Execute Projection</button>
         </div>
+      </div>
 
-        <!-- Aggregation Modal -->
-        <div id="aggregation-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('aggregation-modal')">&times;</span>
-                <h2>Aggregation Operation</h2>
-                <div class="form-group">
-                    <label for="aggregation-table">Select Table:</label>
-                    <select id="aggregation-table" onchange="loadAggregationColumns(this.value)">
-                        <option value="">Choose a table</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="aggregation-column">Select Column:</label>
-                    <select id="aggregation-column"></select>
-                </div>
-                <div class="form-group">
-                    <label for="aggregation-operation">Select Operation:</label>
-                    <select id="aggregation-operation">
-                        <option value="COUNT">Count</option>
-                        <option value="SUM">Sum</option>
-                        <option value="AVG">Average</option>
-                        <option value="MAX">Maximum</option>
-                        <option value="MIN">Minimum</option>
-                    </select>
-                </div>
-                <div id="aggregation-results" class="table-container"></div>
-                <button onclick="performAggregation()">Execute Aggregation</button>
-            </div>
+      <!-- Aggregation Modal -->
+      <div id="aggregation-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('aggregation-modal')"
+            >&times;</span
+          >
+          <h2>Aggregation Operation</h2>
+          <div class="form-group">
+            <label for="aggregation-table">Select Table:</label>
+            <select
+              id="aggregation-table"
+              onchange="loadAggregationColumns(this.value)"
+            >
+              <option value="">Choose a table</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="aggregation-column">Select Column:</label>
+            <select id="aggregation-column"></select>
+          </div>
+          <div class="form-group">
+            <label for="aggregation-operation">Select Operation:</label>
+            <select id="aggregation-operation">
+              <option value="COUNT">Count</option>
+              <option value="SUM">Sum</option>
+              <option value="AVG">Average</option>
+              <option value="MAX">Maximum</option>
+              <option value="MIN">Minimum</option>
+            </select>
+          </div>
+          <div id="aggregation-results" class="table-container"></div>
+          <button onclick="performAggregation()">Execute Aggregation</button>
         </div>
+      </div>
 
-        <!-- Search Modal -->
-        <div id="search-modal" class="modal">
-            <div class="modal-content">
-                <span class="close" onclick="closeModal('search-modal')">&times;</span>
-                <h2>Search Operation</h2>
-                <div class="form-group">
-                    <label for="search-table">Select Table:</label>
-                    <select id="search-table" onchange="loadSearchColumns(this.value)">
-                        <option value="">Choose a table</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="search-column">Select Column:</label>
-                    <select id="search-column"></select>
-                </div>
-                <div class="form-group">
-                    <label for="search-pattern">Search Pattern:</label>
-                    <input type="text" id="search-pattern">
-                </div>
-                <div id="search-results" class="table-container"></div>
-                <button onclick="performSearch()">Execute Search</button>
-            </div>
+      <!-- Search Modal -->
+      <div id="search-modal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal('search-modal')"
+            >&times;</span
+          >
+          <h2>Search Operation</h2>
+          <div class="form-group">
+            <label for="search-table">Select Table:</label>
+            <select id="search-table" onchange="loadSearchColumns(this.value)">
+              <option value="">Choose a table</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="search-column">Select Column:</label>
+            <select id="search-column"></select>
+          </div>
+          <div class="form-group">
+            <label for="search-pattern">Search Pattern:</label>
+            <input type="text" id="search-pattern" />
+          </div>
+          <div id="search-results" class="table-container"></div>
+          <button onclick="performSearch()">Execute Search</button>
         </div>
+      </div>
     </div>
 
     <script src="/static/script.js"></script>
-</body>
+  </body>
 </html>

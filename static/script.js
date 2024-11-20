@@ -368,6 +368,7 @@ async function loadAnalysis(type) {
     const data = await response.json();
 
     // Create table from data
+    console.log(data);
     let table = "<table><thead><tr>";
     const headers = Object.keys(data[0] || {});
     headers.forEach((header) => {
@@ -414,44 +415,44 @@ window.onclick = function (event) {
 
 async function fetchTableData(table) {
   try {
-      const response = await fetch(`/api/read/${table}`);
-      const data = await response.json();
-      createTable(data, "readTableContainer");
+    const response = await fetch(`/api/read/${table}`);
+    const data = await response.json();
+    createTable(data, "readTableContainer");
   } catch (error) {
-      console.error("Error fetching table data:", error);
+    console.error("Error fetching table data:", error);
   }
 }
 
 function loadTableSchema(table, containerId, forUpdate = false) {
   fetch(`/api/table-schema/${table}`)
-      .then((res) => res.json())
-      .then((schema) => {
-          const container = document.getElementById(containerId);
-          container.innerHTML = "";
+    .then((res) => res.json())
+    .then((schema) => {
+      const container = document.getElementById(containerId);
+      container.innerHTML = "";
 
-          schema.forEach((field) => {
-              const row = document.createElement("div");
-              row.className = "form-row";
+      schema.forEach((field) => {
+        const row = document.createElement("div");
+        row.className = "form-row";
 
-              const label = document.createElement("label");
-              label.textContent = field.name.replace(/_/g, " ");
-              row.appendChild(label);
+        const label = document.createElement("label");
+        label.textContent = field.name.replace(/_/g, " ");
+        row.appendChild(label);
 
-              if (forUpdate) {
-                  const input = document.createElement("input");
-                  input.name = field.name;
-                  input.placeholder = "Enter value or leave blank";
-                  row.appendChild(input);
-              } else {
-                  const btn = document.createElement("button");
-                  btn.textContent = `Delete ${field.name}`;
-                  btn.onclick = () => deleteRow(table, field.name);
-                  row.appendChild(btn);
-              }
-              container.appendChild(row);
-          });
-      })
-      .catch((err) => console.error(err));
+        if (forUpdate) {
+          const input = document.createElement("input");
+          input.name = field.name;
+          input.placeholder = "Enter value or leave blank";
+          row.appendChild(input);
+        } else {
+          const btn = document.createElement("button");
+          btn.textContent = `Delete ${field.name}`;
+          btn.onclick = () => deleteRow(table, field.name);
+          row.appendChild(btn);
+        }
+        container.appendChild(row);
+      });
+    })
+    .catch((err) => console.error(err));
 }
 
 async function fetchTableData(table) {
@@ -461,33 +462,33 @@ async function fetchTableData(table) {
     const response = await fetch(`/api/read/${table}`);
     const data = await response.json();
 
-    const tableContainer = document.getElementById('readTableContainer');
-    tableContainer.innerHTML = '';
+    const tableContainer = document.getElementById("readTableContainer");
+    tableContainer.innerHTML = "";
 
-    if (data.status === 'error') {
+    if (data.status === "error") {
       tableContainer.innerHTML = `<p>Error: ${data.message}</p>`;
       return;
     }
 
-    const tableElement = document.createElement('table');
-    const thead = document.createElement('thead');
-    const tbody = document.createElement('tbody');
+    const tableElement = document.createElement("table");
+    const thead = document.createElement("thead");
+    const tbody = document.createElement("tbody");
 
     // Create table headers
     const headers = Object.keys(data[0]);
-    const headerRow = document.createElement('tr');
-    headers.forEach(header => {
-      const th = document.createElement('th');
+    const headerRow = document.createElement("tr");
+    headers.forEach((header) => {
+      const th = document.createElement("th");
       th.textContent = header;
       headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
 
     // Create table rows
-    data.forEach(row => {
-      const tr = document.createElement('tr');
-      headers.forEach(header => {
-        const td = document.createElement('td');
+    data.forEach((row) => {
+      const tr = document.createElement("tr");
+      headers.forEach((header) => {
+        const td = document.createElement("td");
         td.textContent = row[header];
         tr.appendChild(td);
       });
@@ -498,227 +499,230 @@ async function fetchTableData(table) {
     tableElement.appendChild(tbody);
     tableContainer.appendChild(tableElement);
   } catch (error) {
-    console.error('Error fetching table data:', error);
+    console.error("Error fetching table data:", error);
   }
 }
 
 async function loadTableOptions() {
   try {
-    const response = await fetch('/api/tables');
+    const response = await fetch("/api/tables");
     const tables = await response.json();
 
-    const select = document.getElementById('read-table');
-    tables.forEach(table => {
-      const option = document.createElement('option');
+    const select = document.getElementById("read-table");
+    tables.forEach((table) => {
+      const option = document.createElement("option");
       option.value = table;
       option.textContent = table;
       select.appendChild(option);
     });
   } catch (error) {
-    console.error('Error loading table options:', error);
+    console.error("Error loading table options:", error);
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadTableOptions);
+document.addEventListener("DOMContentLoaded", loadTableOptions);
 
-document.addEventListener('DOMContentLoaded', function() {
-  const selectionTableSelect = document.getElementById('selection-table');
-  const projectionTableSelect = document.getElementById('projection-table');
-  const aggregationTableSelect = document.getElementById('aggregation-table');
-  const searchTableSelect = document.getElementById('search-table');
+document.addEventListener("DOMContentLoaded", function () {
+  const selectionTableSelect = document.getElementById("selection-table");
+  const projectionTableSelect = document.getElementById("projection-table");
+  const aggregationTableSelect = document.getElementById("aggregation-table");
+  const searchTableSelect = document.getElementById("search-table");
 
-  fetch('/api/tables')
-      .then(response => response.json())
-      .then(tables => {
-          const selectElements = [
-              selectionTableSelect, 
-              projectionTableSelect, 
-              aggregationTableSelect, 
-              searchTableSelect
-          ];
+  fetch("/api/tables")
+    .then((response) => response.json())
+    .then((tables) => {
+      const selectElements = [
+        selectionTableSelect,
+        projectionTableSelect,
+        aggregationTableSelect,
+        searchTableSelect,
+      ];
 
-          selectElements.forEach(select => {
-              tables.forEach(table => {
-                  const option = document.createElement('option');
-                  option.value = table;
-                  option.textContent = table;
-                  select.appendChild(option);
-              });
-          });
+      selectElements.forEach((select) => {
+        tables.forEach((table) => {
+          const option = document.createElement("option");
+          option.value = table;
+          option.textContent = table;
+          select.appendChild(option);
+        });
       });
+    });
 });
 
 function loadSelectionOptions(table) {
   fetch(`/api/tables/columns?table=${table}`)
-      .then(response => response.json())
-      .then(columns => {
-          const columnSelect = document.getElementById('selection-column');
-          columnSelect.innerHTML = '';
-          columns.forEach(column => {
-              const option = document.createElement('option');
-              option.value = column;
-              option.textContent = column;
-              columnSelect.appendChild(option);
-          });
+    .then((response) => response.json())
+    .then((columns) => {
+      const columnSelect = document.getElementById("selection-column");
+      columnSelect.innerHTML = "";
+      columns.forEach((column) => {
+        const option = document.createElement("option");
+        option.value = column;
+        option.textContent = column;
+        columnSelect.appendChild(option);
       });
+    });
 }
 
 function performSelection() {
-  const table = document.getElementById('selection-table').value;
-  const column = document.getElementById('selection-column').value;
-  const condition = document.getElementById('selection-condition').value;
-  const value = document.getElementById('selection-value').value;
+  const table = document.getElementById("selection-table").value;
+  const column = document.getElementById("selection-column").value;
+  const condition = document.getElementById("selection-condition").value;
+  const value = document.getElementById("selection-value").value;
 
-  fetch('/api/selection', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ table, column, condition, value })
+  fetch("/api/selection", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ table, column, condition, value }),
   })
-  .then(response => response.json())
-  .then(data => {
-      const resultsContainer = document.getElementById('selection-results');
-      createTable(data, 'selection-results');
-  })
-  .catch(error => {
-      console.error('Error:', error);
-      const resultsContainer = document.getElementById('selection-results');
-      resultsContainer.innerHTML = '<p class="error">Error performing selection</p>';
-  });
+    .then((response) => response.json())
+    .then((data) => {
+      const resultsContainer = document.getElementById("selection-results");
+      createTable(data, "selection-results");
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      const resultsContainer = document.getElementById("selection-results");
+      resultsContainer.innerHTML =
+        '<p class="error">Error performing selection</p>';
+    });
 }
 
 function performProjection() {
-  const table = document.getElementById('projection-table').value;
-  const columnCheckboxes = document.querySelectorAll('input[name="projection-columns"]:checked');
-  const columns = Array.from(columnCheckboxes).map(cb => cb.value);
+  const table = document.getElementById("projection-table").value;
+  const columnCheckboxes = document.querySelectorAll(
+    'input[name="projection-columns"]:checked'
+  );
+  const columns = Array.from(columnCheckboxes).map((cb) => cb.value);
 
-  fetch('/api/projection', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ table, columns })
+  fetch("/api/projection", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ table, columns }),
   })
-  .then(response => response.json())
-  .then(data => createTable(data, 'projection-results'))
-  .catch(error => {
-      console.error('Error:', error);
-  });
+    .then((response) => response.json())
+    .then((data) => createTable(data, "projection-results"))
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 }
 
 function performAggregation() {
-  const table = document.getElementById('aggregation-table').value;
-  const column = document.getElementById('aggregation-column').value;
-  const operation = document.getElementById('aggregation-operation').value;
+  const table = document.getElementById("aggregation-table").value;
+  const column = document.getElementById("aggregation-column").value;
+  const operation = document.getElementById("aggregation-operation").value;
 
-  fetch('/api/aggregation', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ table, column, operation })
+  fetch("/api/aggregation", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ table, column, operation }),
   })
-  .then(response => response.json())
-  .then(data => createTable(data, 'aggregation-results'))
-  .catch(error => {
-      console.error('Error:', error);
-  });
+    .then((response) => response.json())
+    .then((data) => createTable(data, "aggregation-results"))
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 }
 
 function performSearch() {
-  const table = document.getElementById('search-table').value;
-  const column = document.getElementById('search-column').value;
-  const pattern = document.getElementById('search-pattern').value;
+  const table = document.getElementById("search-table").value;
+  const column = document.getElementById("search-column").value;
+  const pattern = document.getElementById("search-pattern").value;
 
-  fetch('/api/search', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ table, column, pattern })
+  fetch("/api/search", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ table, column, pattern }),
   })
-  .then(response => response.json())
-  .then(data => createTable(data, 'search-results'))
-  .catch(error => {
-      console.error('Error:', error);
-  });
+    .then((response) => response.json())
+    .then((data) => createTable(data, "search-results"))
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 }
 
 function loadProjectionColumns(table) {
   fetch(`/api/tables/columns?table=${table}`)
-      .then(response => response.json())
-      .then(columns => {
-          const columnsContainer = document.getElementById('projection-columns');
-          columnsContainer.innerHTML = '';
-          columns.forEach(column => {
-              const div = document.createElement('div');
-              div.innerHTML = `
+    .then((response) => response.json())
+    .then((columns) => {
+      const columnsContainer = document.getElementById("projection-columns");
+      columnsContainer.innerHTML = "";
+      columns.forEach((column) => {
+        const div = document.createElement("div");
+        div.innerHTML = `
                   <input type="checkbox" name="projection-columns" 
                          id="projection-${column}" value="${column}">
                   <label for="projection-${column}">${column}</label>
               `;
-              columnsContainer.appendChild(div);
-          });
+        columnsContainer.appendChild(div);
       });
+    });
 }
 
 function loadAggregationColumns(table) {
   fetch(`/api/tables/columns?table=${table}`)
-      .then(response => response.json())
-      .then(columns => {
-          const columnSelect = document.getElementById('aggregation-column');
-          columnSelect.innerHTML = '';
-          columns.forEach(column => {
-              const option = document.createElement('option');
-              option.value = column;
-              option.textContent = column;
-              columnSelect.appendChild(option);
-          });
+    .then((response) => response.json())
+    .then((columns) => {
+      const columnSelect = document.getElementById("aggregation-column");
+      columnSelect.innerHTML = "";
+      columns.forEach((column) => {
+        const option = document.createElement("option");
+        option.value = column;
+        option.textContent = column;
+        columnSelect.appendChild(option);
       });
+    });
 }
 
 function loadSearchColumns(table) {
   fetch(`/api/tables/columns?table=${table}`)
-      .then(response => response.json())
-      .then(columns => {
-          const columnSelect = document.getElementById('search-column');
-          columnSelect.innerHTML = '';
-          columns.forEach(column => {
-              const option = document.createElement('option');
-              option.value = column;
-              option.textContent = column;
-              columnSelect.appendChild(option);
-          });
+    .then((response) => response.json())
+    .then((columns) => {
+      const columnSelect = document.getElementById("search-column");
+      columnSelect.innerHTML = "";
+      columns.forEach((column) => {
+        const option = document.createElement("option");
+        option.value = column;
+        option.textContent = column;
+        columnSelect.appendChild(option);
       });
+    });
 }
 
 // Add these to the existing script.js file
 
 // Drag and drop functionality for tiles
-document.addEventListener('DOMContentLoaded', function() {
-  const grid = document.querySelector('.grid');
-  
+document.addEventListener("DOMContentLoaded", function () {
+  const grid = document.querySelector(".grid");
+
   // Make tiles draggable
-  const tiles = document.querySelectorAll('.card.operation-card');
-  tiles.forEach(tile => {
-    tile.setAttribute('draggable', 'true');
-    
-    tile.addEventListener('dragstart', dragStart);
-    tile.addEventListener('dragend', dragEnd);
-    tile.addEventListener('dragover', dragOver);
-    tile.addEventListener('dragenter', dragEnter);
-    tile.addEventListener('dragleave', dragLeave);
-    tile.addEventListener('drop', drop);
+  const tiles = document.querySelectorAll(".card.operation-card");
+  tiles.forEach((tile) => {
+    tile.setAttribute("draggable", "true");
+
+    tile.addEventListener("dragstart", dragStart);
+    tile.addEventListener("dragend", dragEnd);
+    tile.addEventListener("dragover", dragOver);
+    tile.addEventListener("dragenter", dragEnter);
+    tile.addEventListener("dragleave", dragLeave);
+    tile.addEventListener("drop", drop);
   });
 
   function dragStart(e) {
-    this.classList.add('dragging');
-    e.dataTransfer.setData('text/plain', this.id);
+    this.classList.add("dragging");
+    e.dataTransfer.setData("text/plain", this.id);
   }
 
   function dragEnd(e) {
-    this.classList.remove('dragging');
+    this.classList.remove("dragging");
   }
 
   function dragOver(e) {
@@ -727,33 +731,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function dragEnter(e) {
     e.preventDefault();
-    this.classList.add('drag-over');
+    this.classList.add("drag-over");
   }
 
   function dragLeave() {
-    this.classList.remove('drag-over');
+    this.classList.remove("drag-over");
   }
 
   function drop(e) {
     e.preventDefault();
-    this.classList.remove('drag-over');
-    
-    const draggedTileId = e.dataTransfer.getData('text/plain');
+    this.classList.remove("drag-over");
+
+    const draggedTileId = e.dataTransfer.getData("text/plain");
     const draggedTile = document.getElementById(draggedTileId);
-    
+
     // Swap tiles
     const currentTile = e.currentTarget;
     const tempHTML = currentTile.innerHTML;
     const tempId = currentTile.id;
-    const tempOnclick = currentTile.getAttribute('onclick');
-    
+    const tempOnclick = currentTile.getAttribute("onclick");
+
     currentTile.innerHTML = draggedTile.innerHTML;
     currentTile.id = draggedTile.id;
-    currentTile.setAttribute('onclick', draggedTile.getAttribute('onclick'));
-    
+    currentTile.setAttribute("onclick", draggedTile.getAttribute("onclick"));
+
     draggedTile.innerHTML = tempHTML;
     draggedTile.id = tempId;
-    draggedTile.setAttribute('onclick', tempOnclick);
+    draggedTile.setAttribute("onclick", tempOnclick);
 
     // Save layout to localStorage
     saveTileLayout();
@@ -761,27 +765,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Persist tile layout
   function saveTileLayout() {
-    const tiles = Array.from(document.querySelectorAll('.card.operation-card'))
-      .map(tile => ({
-        id: tile.id,
-        innerHTML: tile.innerHTML,
-        onclick: tile.getAttribute('onclick')
-      }));
-    localStorage.setItem('tileLayout', JSON.stringify(tiles));
+    const tiles = Array.from(
+      document.querySelectorAll(".card.operation-card")
+    ).map((tile) => ({
+      id: tile.id,
+      innerHTML: tile.innerHTML,
+      onclick: tile.getAttribute("onclick"),
+    }));
+    localStorage.setItem("tileLayout", JSON.stringify(tiles));
   }
 
   // Restore tile layout from localStorage
   function restoreTileLayout() {
-    const savedLayout = localStorage.getItem('tileLayout');
+    const savedLayout = localStorage.getItem("tileLayout");
     if (savedLayout) {
       const tiles = JSON.parse(savedLayout);
-      const currentTiles = document.querySelectorAll('.card.operation-card');
-      
+      const currentTiles = document.querySelectorAll(".card.operation-card");
+
       tiles.forEach((savedTile, index) => {
         if (currentTiles[index]) {
           currentTiles[index].id = savedTile.id;
           currentTiles[index].innerHTML = savedTile.innerHTML;
-          currentTiles[index].setAttribute('onclick', savedTile.onclick);
+          currentTiles[index].setAttribute("onclick", savedTile.onclick);
         }
       });
     }
