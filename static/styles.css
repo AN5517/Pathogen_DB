@@ -32,13 +32,15 @@ h1 {
   letter-spacing: 2px;
 }
 
+/* Updated grid styles for vertical layout */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr; /* Force single column */
   gap: 20px;
   margin-top: 20px;
 }
 
+/* Existing card styles remain the same */
 .card {
   background: rgba(43, 151, 107, 0.1);
   border: 2px solid #2b976b;
@@ -48,6 +50,17 @@ h1 {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  width: 90%; /* Reduce the width */
+  max-width: 450px; /* Set a maximum width */
+  margin: 0 auto; /* Center the card */
+}
+
+/* Optional: Remove the media query for grid since it's now always single column */
+@media (max-width: 768px) {
+  /* These styles are no longer needed as the grid is already single column */
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card:hover,
