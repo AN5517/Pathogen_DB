@@ -178,10 +178,10 @@ def analysis_high_risk():
     threshold = request.args.get('threshold', default=0, type=float)
     return get_high_risk_pathogens(threshold)
 
-@app.route('/api/analysis/research-labs')
-def analysis_research_labs():
-    pathogen_type = request.args.get('pathogen_type', default='', type=str)
-    return get_labs_by_pathogen_type(pathogen_type)
+# @app.route('/api/analysis/research-labs')
+# def analysis_research_labs():
+#     pathogen_type = request.args.get('pathogen_type', default='', type=str)
+#     return get_labs_by_pathogen_type(pathogen_type)
 
 @app.route('/api/analysis/vaccine-distribution')
 def analysis_vaccine_distribution():
