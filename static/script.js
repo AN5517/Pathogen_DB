@@ -251,6 +251,26 @@ document.addEventListener("DOMContentLoaded", function () {
       select.appendChild(option);
     });
   });
+
+  // Populate table dropdowns for update and delete
+  fetch("/api/tables")
+    .then((response) => response.json())
+    .then((tables) => {
+      const updateTableSelect = document.getElementById("update-table");
+      const deleteTableSelect = document.getElementById("delete-table");
+
+      tables.forEach((table) => {
+        const updateOption = document.createElement("option");
+        updateOption.value = table;
+        updateOption.textContent = table;
+        updateTableSelect.appendChild(updateOption);
+
+        const deleteOption = document.createElement("option");
+        deleteOption.value = table;
+        deleteOption.textContent = table;
+        deleteTableSelect.appendChild(deleteOption);
+      });
+    });
 });
 
 // Modal functions
