@@ -50,9 +50,9 @@ h1 {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  width: 90%; /* Reduce the width */
-  max-width: 450px; /* Set a maximum width */
-  margin: 0 auto; /* Center the card */
+  width: 90%; 
+  max-width: 450px;
+  margin: 0 auto; 
 }
 
 /* Optional: Remove the media query for grid since it's now always single column */

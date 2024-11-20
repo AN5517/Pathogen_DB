@@ -35,6 +35,27 @@
                 <h2>View Data</h2>
                 <p>Browse table contents</p>
             </div>
+
+            <!-- New Tiles -->
+            <div class="card operation-card" onclick="openModal('selection-modal')">
+                <h2>Selection</h2>
+                <p>Select rows based on conditions</p>
+            </div>
+
+            <div class="card operation-card" onclick="openModal('projection-modal')">
+                <h2>Projection</h2>
+                <p>Select specific columns</p>
+            </div>
+
+            <div class="card operation-card" onclick="openModal('aggregation-modal')">
+                <h2>Aggregation</h2>
+                <p>Calculate aggregate values</p>
+            </div>
+
+            <div class="card operation-card" onclick="openModal('search-modal')">
+                <h2>Search</h2>
+                <p>Find rows using pattern matching</p>
+            </div>
         </div>
 
         <!-- Insert Modal -->
@@ -125,6 +146,118 @@
                     </select>
                 </div>
                 <div id="readTableContainer" class="table-container"></div>
+            </div>
+        </div>
+
+        <!-- Selection Modal -->
+        <div id="selection-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('selection-modal')">&times;</span>
+                <h2>Selection Operation</h2>
+                <div class="form-group">
+                    <label for="selection-table">Select Table:</label>
+                    <select id="selection-table" onchange="loadSelectionOptions(this.value)">
+                        <option value="">Choose a table</option>
+                        <!-- Tables will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="selection-column">Select Column:</label>
+                    <select id="selection-column">
+                        <!-- Columns will be populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="selection-condition">Condition:</label>
+                    <select id="selection-condition">
+                        <option value="=">=</option>
+                        <option value=">">&gt;</option>
+                        <option value="<">&lt;</option>
+                        <option value=">=">&gt;=</option>
+                        <option value="<=">&lt;=</option>
+                        <option value="!=">!=</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="selection-value">Value:</label>
+                    <input type="text" id="selection-value">
+                </div>
+                <div id="selection-results" class="table-container"></div>
+                <button onclick="performSelection()">Execute Selection</button>
+            </div>
+        </div>
+
+        <!-- Projection Modal -->
+        <div id="projection-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('projection-modal')">&times;</span>
+                <h2>Projection Operation</h2>
+                <div class="form-group">
+                    <label for="projection-table">Select Table:</label>
+                    <select id="projection-table" onchange="loadProjectionColumns(this.value)">
+                        <option value="">Choose a table</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Columns:</label>
+                    <div id="projection-columns"></div>
+                </div>
+                <div id="projection-results" class="table-container"></div>
+                <button onclick="performProjection()">Execute Projection</button>
+            </div>
+        </div>
+
+        <!-- Aggregation Modal -->
+        <div id="aggregation-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('aggregation-modal')">&times;</span>
+                <h2>Aggregation Operation</h2>
+                <div class="form-group">
+                    <label for="aggregation-table">Select Table:</label>
+                    <select id="aggregation-table" onchange="loadAggregationColumns(this.value)">
+                        <option value="">Choose a table</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="aggregation-column">Select Column:</label>
+                    <select id="aggregation-column"></select>
+                </div>
+                <div class="form-group">
+                    <label for="aggregation-operation">Select Operation:</label>
+                    <select id="aggregation-operation">
+                        <option value="COUNT">Count</option>
+                        <option value="SUM">Sum</option>
+                        <option value="AVG">Average</option>
+                        <option value="MAX">Maximum</option>
+                        <option value="MIN">Minimum</option>
+                    </select>
+                </div>
+                <div id="aggregation-results" class="table-container"></div>
+                <button onclick="performAggregation()">Execute Aggregation</button>
+            </div>
+        </div>
+
+        <!-- Search Modal -->
+        <div id="search-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('search-modal')">&times;</span>
+                <h2>Search Operation</h2>
+                <div class="form-group">
+                    <label for="search-table">Select Table:</label>
+                    <select id="search-table" onchange="loadSearchColumns(this.value)">
+                        <option value="">Choose a table</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="search-column">Select Column:</label>
+                    <select id="search-column"></select>
+                </div>
+                <div class="form-group">
+                    <label for="search-pattern">Search Pattern:</label>
+                    <input type="text" id="search-pattern">
+                </div>
+                <div id="search-results" class="table-container"></div>
+                <button onclick="performSearch()">Execute Search</button>
             </div>
         </div>
     </div>

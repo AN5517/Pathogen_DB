@@ -318,5 +318,101 @@ def get_tables():
     finally:
         conn.close()
 
+# New Routes
+@app.route('/api/tables/columns', methods=['GET'])
+def get_table_columns():
+    table = request.args.get('table')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute(f"DESCRIBE {table}")
+        columns = [col[0] for col in cursor.fetchall()]
+        return jsonify(columns)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/selection', methods=['POST'])
+def perform_selection():
+    data = request.json
+    table = data.get('table')
+    column = data.get('column')
+    condition = data.get('condition')
+    value = data.get('value')
+
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        query = f"SELECT * FROM {table} WHERE {column} {condition} %s"
+        cursor.execute(query, (value,))
+        results = cursor.fetchall()
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/projection', methods=['POST'])
+def perform_projection():
+    data = request.json
+    table = data.get('table')
+    columns = data.get('columns', [])
+
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        query = f"SELECT {', '.join(columns)} FROM {table}"
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/aggregation', methods=['POST'])
+def perform_aggregation():
+    data = request.json
+    table = data.get('table')
+    column = data.get('column')
+    operation = data.get('operation')
+
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        query = f"SELECT {operation}({column}) as result FROM {table}"
+        cursor.execute(query)
+        results = cursor.fetchall()
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/search', methods=['POST'])
+def perform_search():
+    data = request.json
+    table = data.get('table')
+    column = data.get('column')
+    pattern = data.get('pattern')
+
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        query = f"SELECT * FROM {table} WHERE {column} LIKE %s"
+        cursor.execute(query, (f'%{pattern}%',))
+        results = cursor.fetchall()
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
 if __name__ == '__main__':
     app.run(debug=True)

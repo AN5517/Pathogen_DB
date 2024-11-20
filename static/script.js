@@ -520,3 +520,175 @@ async function loadTableOptions() {
 }
 
 document.addEventListener('DOMContentLoaded', loadTableOptions);
+
+document.addEventListener('DOMContentLoaded', function() {
+  const selectionTableSelect = document.getElementById('selection-table');
+  const projectionTableSelect = document.getElementById('projection-table');
+  const aggregationTableSelect = document.getElementById('aggregation-table');
+  const searchTableSelect = document.getElementById('search-table');
+
+  fetch('/api/tables')
+      .then(response => response.json())
+      .then(tables => {
+          const selectElements = [
+              selectionTableSelect, 
+              projectionTableSelect, 
+              aggregationTableSelect, 
+              searchTableSelect
+          ];
+
+          selectElements.forEach(select => {
+              tables.forEach(table => {
+                  const option = document.createElement('option');
+                  option.value = table;
+                  option.textContent = table;
+                  select.appendChild(option);
+              });
+          });
+      });
+});
+
+function loadSelectionOptions(table) {
+  fetch(`/api/tables/columns?table=${table}`)
+      .then(response => response.json())
+      .then(columns => {
+          const columnSelect = document.getElementById('selection-column');
+          columnSelect.innerHTML = '';
+          columns.forEach(column => {
+              const option = document.createElement('option');
+              option.value = column;
+              option.textContent = column;
+              columnSelect.appendChild(option);
+          });
+      });
+}
+
+function performSelection() {
+  const table = document.getElementById('selection-table').value;
+  const column = document.getElementById('selection-column').value;
+  const condition = document.getElementById('selection-condition').value;
+  const value = document.getElementById('selection-value').value;
+
+  fetch('/api/selection', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ table, column, condition, value })
+  })
+  .then(response => response.json())
+  .then(data => {
+      const resultsContainer = document.getElementById('selection-results');
+      createTable(data, 'selection-results');
+  })
+  .catch(error => {
+      console.error('Error:', error);
+      const resultsContainer = document.getElementById('selection-results');
+      resultsContainer.innerHTML = '<p class="error">Error performing selection</p>';
+  });
+}
+
+function performProjection() {
+  const table = document.getElementById('projection-table').value;
+  const columnCheckboxes = document.querySelectorAll('input[name="projection-columns"]:checked');
+  const columns = Array.from(columnCheckboxes).map(cb => cb.value);
+
+  fetch('/api/projection', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ table, columns })
+  })
+  .then(response => response.json())
+  .then(data => createTable(data, 'projection-results'))
+  .catch(error => {
+      console.error('Error:', error);
+  });
+}
+
+function performAggregation() {
+  const table = document.getElementById('aggregation-table').value;
+  const column = document.getElementById('aggregation-column').value;
+  const operation = document.getElementById('aggregation-operation').value;
+
+  fetch('/api/aggregation', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ table, column, operation })
+  })
+  .then(response => response.json())
+  .then(data => createTable(data, 'aggregation-results'))
+  .catch(error => {
+      console.error('Error:', error);
+  });
+}
+
+function performSearch() {
+  const table = document.getElementById('search-table').value;
+  const column = document.getElementById('search-column').value;
+  const pattern = document.getElementById('search-pattern').value;
+
+  fetch('/api/search', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ table, column, pattern })
+  })
+  .then(response => response.json())
+  .then(data => createTable(data, 'search-results'))
+  .catch(error => {
+      console.error('Error:', error);
+  });
+}
+
+function loadProjectionColumns(table) {
+  fetch(`/api/tables/columns?table=${table}`)
+      .then(response => response.json())
+      .then(columns => {
+          const columnsContainer = document.getElementById('projection-columns');
+          columnsContainer.innerHTML = '';
+          columns.forEach(column => {
+              const div = document.createElement('div');
+              div.innerHTML = `
+                  <input type="checkbox" name="projection-columns" 
+                         id="projection-${column}" value="${column}">
+                  <label for="projection-${column}">${column}</label>
+              `;
+              columnsContainer.appendChild(div);
+          });
+      });
+}
+
+function loadAggregationColumns(table) {
+  fetch(`/api/tables/columns?table=${table}`)
+      .then(response => response.json())
+      .then(columns => {
+          const columnSelect = document.getElementById('aggregation-column');
+          columnSelect.innerHTML = '';
+          columns.forEach(column => {
+              const option = document.createElement('option');
+              option.value = column;
+              option.textContent = column;
+              columnSelect.appendChild(option);
+          });
+      });
+}
+
+function loadSearchColumns(table) {
+  fetch(`/api/tables/columns?table=${table}`)
+      .then(response => response.json())
+      .then(columns => {
+          const columnSelect = document.getElementById('search-column');
+          columnSelect.innerHTML = '';
+          columns.forEach(column => {
+              const option = document.createElement('option');
+              option.value = column;
+              option.textContent = column;
+              columnSelect.appendChild(option);
+          });
+      });
+}
