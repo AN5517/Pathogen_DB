@@ -130,7 +130,6 @@ def read_table(table):
     finally:
         conn.close()
 
-# Update specific attribute
 @app.route('/api/update/<table>', methods=['POST'])
 def update_attribute(table):
     conn = get_db_connection()
@@ -139,27 +138,26 @@ def update_attribute(table):
         data = request.json
         column_to_update = data.get('column')
         value = data.get('value')
-        identifier_column = data.get('identifier_column')
+        identifier_column = data.get('identifier_column', 'id')
         identifier_value = data.get('identifier_value')
 
         sql = f"UPDATE {table} SET {column_to_update} = %s WHERE {identifier_column} = %s"
         cursor.execute(sql, (value, identifier_value))
         conn.commit()
-        return jsonify({'status': 'success', 'message': 'Record updated successfully'})
+        return jsonify({'status': 'success', 'message': f'{column_to_update} updated successfully'})
     except Exception as e:
         conn.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 500
     finally:
         conn.close()
 
-# Delete specific row
 @app.route('/api/delete/<table>', methods=['POST'])
 def delete_row(table):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
         data = request.json
-        identifier_column = data.get('identifier_column')
+        identifier_column = data.get('identifier_column', 'id')
         identifier_value = data.get('identifier_value')
 
         sql = f"DELETE FROM {table} WHERE {identifier_column} = %s"
