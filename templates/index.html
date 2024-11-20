@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pathogen Research Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Pathogen Research Dashboard</h1>
+        
+        <div class="grid">
+            <div class="card operation-card" onclick="openModal('insert-modal')">
+                <h2>Insert Data</h2>
+                <p>Add new records to database tables</p>
+            </div>
+
+            <div class="card operation-card" onclick="openModal('update-modal')">
+                <h2>Update Data</h2>
+                <p>Modify existing records</p>
+            </div>
+
+            <div class="card operation-card" onclick="openModal('delete-modal')">
+                <h2>Delete Data</h2>
+                <p>Remove records from database</p>
+            </div>
+
+            <div class="card operation-card center-align" onclick="openModal('analysis-modal')">
+                <h2>Analysis</h2>
+                <p>View analytical reports and statistics</p>
+            </div>
+
+            <div class="card operation-card center-align" onclick="openModal('read-modal')">
+                <h2>View Data</h2>
+                <p>Browse table contents</p>
+            </div>
+        </div>
+
+        <!-- Insert Modal -->
+        <div id="insert-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('insert-modal')">&times;</span>
+                <h2>Insert Data</h2>
+                <div class="form-group">
+                    <label for="insert-table">Select Table:</label>
+                    <select id="insert-table" onchange="loadTableForm('insert')">
+                        <option value="">Select a table...</option>
+                    </select>
+                </div>
+                <div id="insert-form-container" class="form-container"></div>
+            </div>
+        </div>
+
+        <!-- Update Modal -->
+        <div id="update-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('update-modal')">&times;</span>
+                <h2>Update Data</h2>
+                <div class="form-group">
+                    <label for="update-table">Select Table:</label>
+                    <select id="update-table" onchange="loadTableForm('update')">
+                        <option value="">Select a table...</option>
+                    </select>
+                </div>
+                <div id="update-form-container" class="form-container"></div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div id="delete-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('delete-modal')">&times;</span>
+                <h2>Delete Data</h2>
+                <div class="form-group">
+                    <label for="delete-table">Select Table:</label>
+                    <select id="delete-table" onchange="loadTableForm('delete')">
+                        <option value="">Select a table...</option>
+                    </select>
+                </div>
+                <div id="delete-form-container" class="form-container"></div>
+            </div>
+        </div>
+
+        <!-- Analysis Modal -->
+        <div id="analysis-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('analysis-modal')">&times;</span>
+                <h2>Analysis Options</h2>
+                <div class="analysis-options">
+                    <div class="card" onclick="loadAnalysis('high-risk')">
+                        <h3>High Risk Pathogens</h3>
+                        <p>View pathogens with high mutation probability</p>
+                    </div>
+                    <div class="card" onclick="loadAnalysis('research-labs')">
+                        <h3>Research Labs Analysis</h3>
+                        <p>View labs by pathogen type</p>
+                    </div>
+                    <div class="card" onclick="loadAnalysis('vaccine-distribution')">
+                        <h3>Vaccine Distribution</h3>
+                        <p>Global distribution statistics</p>
+                    </div>
+                    <div class="card" onclick="loadAnalysis('mutation-impact')">
+                        <h3>Mutation Impact</h3>
+                        <p>Historical mutation data analysis</p>
+                    </div>
+                    <div class="card" onclick="loadAnalysis('project-success')">
+                        <h3>Project Success</h3>
+                        <p>Research project metrics</p>
+                    </div>
+                </div>
+                <div id="analysis-results" class="table-container"></div>
+            </div>
+        </div>
+
+        <!-- Read Modal -->
+        <div id="read-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('read-modal')">&times;</span>
+                <h2>View Table Data</h2>
+                <div class="form-group">
+                    <label for="read-table">Select Table:</label>
+                    <select id="read-table" onchange="fetchTableData(this.value)">
+                        <option value="">Select a table...</option>
+                    </select>
+                </div>
+                <div id="readTableContainer" class="table-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

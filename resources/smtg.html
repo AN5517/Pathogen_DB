@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pathogen Research Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .alert {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pathogen Research Dashboard</h1>
+        
+        <div class="grid">
+            <!-- High Risk Pathogens -->
+            <div class="card">
+                <h2>High Risk Pathogens</h2>
+                <div class="form-group">
+                    <label for="mutationThreshold">Mutation Probability Threshold (%)</label>
+                    <input type="number" id="mutationThreshold" value="0.2" min="0" max="100" step="0.1">
+                </div>
+                <button onclick="loadHighRiskPathogens()">Load Data</button>
+                <div id="highRiskPathogensTable"></div>
+            </div>
+
+            <!-- Research Labs -->
+            <div class="card">
+                <h2>Research Labs by Pathogen Type</h2>
+                <div class="form-group">
+                    <select id="pathogenType">
+                        <option value="Virus">Virus</option>
+                        <option value="Bacteria">Bacteria</option>
+                        <option value="Protozoa">Protozoa</option>
+                        <option value="Fungus">Fungus</option>
+                    </select>
+                </div>
+                <button onclick="loadLabsByPathogenType()">Load Data</button>
+                <div id="researchLabsTable"></div>
+            </div>
+
+            <!-- Vaccine Distribution -->
+            <div class="card">
+                <h2>Vaccine Distribution Statistics</h2>
+                <button onclick="loadVaccineDistributionStats()">Load Data</button>
+                <div id="vaccineDistributionTable"></div>
+            </div>
+
+            <!-- Mutation Impact -->
+            <div class="card">
+                <h2>Mutation Impact Analysis</h2>
+                <button onclick="loadMutationImpact()">Load Data</button>
+                <div id="mutationImpactTable"></div>
+            </div>
+
+            <!-- Project Success Metrics -->
+            <div class="card">
+                <h2>Research Project Success Metrics</h2>
+                <button onclick="loadProjectSuccessMetrics()">Load Data</button>
+                <div id="projectSuccessTable"></div>
+            </div>
+
+            <!-- Update Forms -->
+            <div class="card">
+                <h2>Update Vaccine Effectiveness</h2>
+                <div class="form-group">
+                    <label for="vaccineId">Vaccine ID</label>
+                    <input type="text" id="vaccineId">
+                </div>
+                <div class="form-group">
+                    <label for="effectiveness">New Effectiveness (%)</label>
+                    <input type="number" id="effectiveness" min="0" max="100">
+                </div>
+                <button onclick="updateVaccineEffectiveness()">Update</button>
+            </div>
+
+            <div class="card">
+                <h2>Update Project Status</h2>
+                <div class="form-group">
+                    <label for="projectId">Project ID</label>
+                    <input type="text" id="projectId">
+                </div>
+                <div class="form-group">
+                    <label for="projectStatus">Status</label>
+                    <select id="projectStatus">
+                        <option value="ongoing">Ongoing</option>
+                        <option value="completed">Completed</option>
+                        <option value="suspended">Suspended</option>
+                    </select>
+                </div>
+                <button onclick="updateProjectStatus()">Update</button>
+            </div>
+
+            <div class="card">
+                <h2>Update Lab Funding</h2>
+                <div class="form-group">
+                    <label for="labId">Lab ID</label>
+                    <input type="text" id="labId">
+                </div>
+                <div class="form-group">
+                    <label for="fundingChange">Funding Change ($)</label>
+                    <input type="number" id="fundingChange">
+                </div>
+                <button onclick="updateLabFunding()">Update</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Helper function to show alerts
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            // Find the relevant card and insert the alert at the top
+            const targetCard = event.target.closest('.card');
+            targetCard.insertBefore(alert, targetCard.firstChild);
+            
+            // Remove alert after 3 seconds
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        // Helper function to create tables
+        function createTable(data, containerId) {
+            if (!data || data.length === 0) {
+                document.getElementById(containerId).innerHTML = 'No data available';
+                return;
+            }
+
+            const table = document.createElement('table');
+            const headers = Object.keys(data[0]);
+            
+            // Create header row
+            const headerRow = document.createElement('tr');
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header.replace(/_/g, ' ').toUpperCase();
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+
+            // Create data rows
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    td.textContent = row[header];
+                    tr.appendChild(td);
+                });
+                table.appendChild(tr);
+            });
+
+            document.getElementById(containerId).innerHTML = '';
+            document.getElementById(containerId).appendChild(table);
+        }
+
+        // Query functions
+        async function loadHighRiskPathogens() {
+            try {
+                const threshold = document.getElementById('mutationThreshold').value;
+                const response = await fetch(`/api/high_risk_pathogens/${threshold}`);
+                const data = await response.json();
+                createTable(data, 'highRiskPathogensTable');
+                showAlert('Data loaded successfully', 'success');
+            } catch (error) {
+                showAlert('Error loading data', 'error');
+            }
+        }
+
+        async function loadLabsByPathogenType() {
+            try {
+                const type = document.getElementById('pathogenType').value;
+                const response = await fetch(`/api/labs_by_pathogen_type/${type}`);
+                const data = await response.json();
+                createTable(data, 'researchLabsTable');
+                showAlert('Data loaded successfully', 'success');
+            } catch (error) {
+                showAlert('Error loading data', 'error');
+            }
+        }
+
+        async function loadVaccineDistributionStats() {
+            try {
+                const response = await fetch('/api/vaccine_distribution_stats');
+                const data = await response.json();
+                createTable(data, 'vaccineDistributionTable');
+                showAlert('Data loaded successfully', 'success');
+            } catch (error) {
+                showAlert('Error loading data', 'error');
+            }
+        }
+
+        async function loadMutationImpact() {
+            try {
+                const response = await fetch('/api/mutation_impact');
+                const data = await response.json();
+                createTable(data, 'mutationImpactTable');
+                showAlert('Data loaded successfully', 'success');
+            } catch (error) {
+                showAlert('Error loading data', 'error');
+            }
+        }
+
+        async function loadProjectSuccessMetrics() {
+            try {
+                const response = await fetch('/api/project_success_metrics');
+                const data = await response.json();
+                createTable(data, 'projectSuccessTable');
+                showAlert('Data loaded successfully', 'success');
+            } catch (error) {
+                showAlert('Error loading data', 'error');
+            }
+        }
+
+        // Update functions
+        async function updateVaccineEffectiveness() {
+            try {
+                const vaccineId = document.getElementById('vaccineId').value;
+                const effectiveness = document.getElementById('effectiveness').value;
+                
+                const response = await fetch('/api/update_vaccine_effectiveness', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ vaccine_id: vaccineId, effectiveness: effectiveness }),
+                });
+                
+                const result = await response.json();
+                showAlert(result.message, result.status === 'success' ? 'success' : 'error');
+            } catch (error) {
+                showAlert('Error updating vaccine effectiveness', 'error');
+            }
+        }
+
+        async function updateProjectStatus() {
+            try {
+                const projectId = document.getElementById('projectId').value;
+                const status = document.getElementById('projectStatus').value;
+                
+                const response = await fetch('/api/update_project_status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        project_id: projectId, 
+                        status: status,
+                        end_date: status === 'completed' ? new Date().toISOString().split('T')[0] : null
+                    }),
+                });
+                
+                const result = await response.json();
+                showAlert(result.message, result.status === 'success' ? 'success' : 'error');
+            } catch (error) {
+                showAlert('Error updating project status', 'error');
+            }
+        }
+
+        async function updateLabFunding() {
+            try {
+                const labId = document.getElementById('labId').value;
+                const fundingChange = document.getElementById('fundingChange').value;
+                
+                const response = await fetch('/api/update_lab_funding', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ lab_id: labId, funding_change: fundingChange }),
+                });
+                
+                const result = await response.json();
+                showAlert(result.message, result.status === 'success' ? 'success' : 'error');
+            } catch (error) {
+                showAlert('Error updating lab funding', 'error');
+            }
+        }
+
+        // Load initial data when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHighRiskPathogens();
+            loadLabsByPathogenType();
+            loadVaccineDistributionStats();
+            loadMutationImpact();
+            loadProjectSuccessMetrics();
+        });
+    </script>
+</body>
+</html>
