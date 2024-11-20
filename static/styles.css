@@ -339,3 +339,27 @@ tr:hover {
   margin-top: 5px;
   font-size: 0.9rem;
 }
+
+.card.operation-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: move; /* Shows that the tile is draggable */
+}
+
+.card.operation-card.dragging {
+  opacity: 0.5;
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(209, 255, 93, 0.3);
+}
+
+.card.operation-card.drag-over {
+  border-color: #ff5d5d;
+  box-shadow: 0 0 10px rgba(255, 93, 93, 0.5);
+}
+
+/* Ensure grid is flexible for dragging */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-auto-flow: dense;
+  gap: 20px;
+}

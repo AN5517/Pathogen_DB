@@ -11,48 +11,48 @@
         <h1>Pathogen Research Dashboard</h1>
         
         <div class="grid">
-            <div class="card operation-card" onclick="openModal('insert-modal')">
+            <div class="card operation-card" id="insert-tile" onclick="openModal('insert-modal')">
                 <h2>Insert Data</h2>
                 <p>Add new records to database tables</p>
             </div>
 
-            <div class="card operation-card" onclick="openModal('update-modal')">
+            <div class="card operation-card" id="update-tile" onclick="openModal('update-modal')">
                 <h2>Update Data</h2>
                 <p>Modify existing records</p>
             </div>
 
-            <div class="card operation-card" onclick="openModal('delete-modal')">
+            <div class="card operation-card" id="delete-tile" onclick="openModal('delete-modal')">
                 <h2>Delete Data</h2>
                 <p>Remove records from database</p>
             </div>
 
-            <div class="card operation-card center-align" onclick="openModal('analysis-modal')">
+            <div class="card operation-card center-align" id="analysis-tile" onclick="openModal('analysis-modal')">
                 <h2>Analysis</h2>
                 <p>View analytical reports and statistics</p>
             </div>
 
-            <div class="card operation-card center-align" onclick="openModal('read-modal')">
+            <div class="card operation-card center-align" id="view-tile" onclick="openModal('read-modal')">
                 <h2>View Data</h2>
                 <p>Browse table contents</p>
             </div>
 
             <!-- New Tiles -->
-            <div class="card operation-card" onclick="openModal('selection-modal')">
+            <div class="card operation-card" id="selection-tile" onclick="openModal('selection-modal')">
                 <h2>Selection</h2>
                 <p>Select rows based on conditions</p>
             </div>
 
-            <div class="card operation-card" onclick="openModal('projection-modal')">
+            <div class="card operation-card" id="projection-tile" onclick="openModal('projection-modal')">
                 <h2>Projection</h2>
                 <p>Select specific columns</p>
             </div>
 
-            <div class="card operation-card" onclick="openModal('aggregation-modal')">
+            <div class="card operation-card" id="aggregation-tile" onclick="openModal('aggregation-modal')">
                 <h2>Aggregation</h2>
                 <p>Calculate aggregate values</p>
             </div>
 
-            <div class="card operation-card" onclick="openModal('search-modal')">
+            <div class="card operation-card" id="search-tile" onclick="openModal('search-modal')">
                 <h2>Search</h2>
                 <p>Find rows using pattern matching</p>
             </div>

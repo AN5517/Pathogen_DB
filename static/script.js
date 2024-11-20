@@ -692,3 +692,108 @@ function loadSearchColumns(table) {
           });
       });
 }
+
+// Add these to the existing script.js file
+
+// Drag and drop functionality for tiles
+document.addEventListener('DOMContentLoaded', function() {
+  const grid = document.querySelector('.grid');
+  
+  // Make tiles draggable
+  const tiles = document.querySelectorAll('.card.operation-card');
+  tiles.forEach(tile => {
+    tile.setAttribute('draggable', 'true');
+    
+    tile.addEventListener('dragstart', dragStart);
+    tile.addEventListener('dragend', dragEnd);
+    tile.addEventListener('dragover', dragOver);
+    tile.addEventListener('dragenter', dragEnter);
+    tile.addEventListener('dragleave', dragLeave);
+    tile.addEventListener('drop', drop);
+  });
+
+  function dragStart(e) {
+    this.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', this.id);
+  }
+
+  function dragEnd(e) {
+    this.classList.remove('dragging');
+  }
+
+  function dragOver(e) {
+    e.preventDefault();
+  }
+
+  function dragEnter(e) {
+    e.preventDefault();
+    this.classList.add('drag-over');
+  }
+
+  function dragLeave() {
+    this.classList.remove('drag-over');
+  }
+
+  function drop(e) {
+    e.preventDefault();
+    this.classList.remove('drag-over');
+    
+    const draggedTileId = e.dataTransfer.getData('text/plain');
+    const draggedTile = document.getElementById(draggedTileId);
+    
+    // Swap tiles
+    const currentTile = e.currentTarget;
+    const tempHTML = currentTile.innerHTML;
+    const tempId = currentTile.id;
+    const tempOnclick = currentTile.getAttribute('onclick');
+    
+    currentTile.innerHTML = draggedTile.innerHTML;
+    currentTile.id = draggedTile.id;
+    currentTile.setAttribute('onclick', draggedTile.getAttribute('onclick'));
+    
+    draggedTile.innerHTML = tempHTML;
+    draggedTile.id = tempId;
+    draggedTile.setAttribute('onclick', tempOnclick);
+
+    // Save layout to localStorage
+    saveTileLayout();
+  }
+
+  // Persist tile layout
+  function saveTileLayout() {
+    const tiles = Array.from(document.querySelectorAll('.card.operation-card'))
+      .map(tile => ({
+        id: tile.id,
+        innerHTML: tile.innerHTML,
+        onclick: tile.getAttribute('onclick')
+      }));
+    localStorage.setItem('tileLayout', JSON.stringify(tiles));
+  }
+
+  // Restore tile layout from localStorage
+  function restoreTileLayout() {
+    const savedLayout = localStorage.getItem('tileLayout');
+    if (savedLayout) {
+      const tiles = JSON.parse(savedLayout);
+      const currentTiles = document.querySelectorAll('.card.operation-card');
+      
+      tiles.forEach((savedTile, index) => {
+        if (currentTiles[index]) {
+          currentTiles[index].id = savedTile.id;
+          currentTiles[index].innerHTML = savedTile.innerHTML;
+          currentTiles[index].setAttribute('onclick', savedTile.onclick);
+        }
+      });
+    }
+  }
+
+  // Add unique IDs to tiles if not already present
+  tiles.forEach((tile, index) => {
+    if (!tile.id) {
+      tile.id = `tile-${index + 1}`;
+    }
+  });
+
+  // Restore layout on page load
+  restoreTileLayout();
+});
