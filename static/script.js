@@ -34,7 +34,7 @@ function showMessage(containerId, message, isError = false) {
   messageDiv.className = `message ${isError ? "error" : "success"}`;
   setTimeout(() => {
     messageDiv.className = "message";
-  }, 3000);
+  }, 10000);
 }
 
 // Load High Risk Pathogens
@@ -53,6 +53,166 @@ async function loadHighRiskPathogens() {
     console.error("Error:", error);
     document.getElementById("highRiskPathogensTable").innerHTML =
       '<p class="error">Error loading pathogen data. Please try again.</p>';
+  }
+}
+
+async function loadPrimaryKeys(table, containerId, delrecord=false) {
+  try {
+    const response = await fetch(`/api/get_primary_keys/${table}`);
+    const result = await response.json();
+
+    if (result.status === "error") {
+      showMessage(containerId, result.message, true);
+      return;
+    }
+
+    const primaryKeys = result.primary_keys;
+    const formContainer = document.getElementById(containerId);
+
+    formContainer.innerHTML = "";
+    primaryKeys.forEach((key) => {
+      formContainer.innerHTML += `
+        <div class="form-group">
+          <label>${key.replace(/_/g, " ")}</label>
+          <input type="text" id="${key}-field" name="${key}" required />
+        </div>
+      `;
+    });
+
+    const editablerec = (delrecord === true ? false : true)
+    formContainer.innerHTML += `
+      <button type="button" onclick="loadRecord('${table}', '${containerId}', ${editablerec ? "true" : "false"})">
+        Load Record
+      </button>
+    `;
+  } catch (error) {
+    console.error("Error loading primary keys:", error);
+  }
+}
+
+async function loadRecord(table, containerId, editable = true) {
+  const formContainer = document.getElementById(containerId);
+  const inputs = formContainer.querySelectorAll("input");
+  const keys = {};
+
+  inputs.forEach((input) => {
+    keys[input.name] = input.value;
+  });
+
+  try {
+    const response = await fetch(`/api/get/${table}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(keys),
+    });
+
+    const result = await response.json();
+
+    if (result.status === "error") {
+      showMessage(containerId, result.message, true);
+      return;
+    }
+
+    const data = result.data;
+    let formHTML = "<form>";
+    for (const key in data) {
+      formHTML += `
+        <div class="form-group">
+          <label>${key.replace(/_/g, " ")}</label>
+          <input 
+            type="text" 
+            value="${data[key]}" 
+            ${editable ? "" : "readonly"} 
+            id="${key}-field"
+            name="${key}"
+          />
+        </div>
+      `;
+    }
+
+    formHTML += `
+      <button type="button" onclick="${editable ? "updateRecord" : "deleteRecord"}('${table}', '${containerId}')">
+        ${editable ? "Update Values" : "Delete"}
+      </button>
+    </form>`;
+    formContainer.innerHTML = formHTML;
+  } catch (error) {
+    console.error("Error loading record:", error);
+  }
+}
+
+async function deleteRecord(table, containerId) {
+  const inputs = document.querySelectorAll(`#${containerId} input`);
+  const keys = {};
+
+  inputs.forEach((input) => {
+    keys[input.name] = input.value;
+  });
+
+  try {
+    const constraintResponse = await fetch(`/api/check_constraints/${table}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(keys),
+    });
+
+    const constraintResult = await constraintResponse.json();
+    console.log(constraintResult);
+
+    if (constraintResult.status === "warning") {
+      // Handle RESTRICT constraints
+      if (constraintResult.restrict_t) {
+        alert(constraintResult.message + " Cannot delete."); // Show message for RESTRICT
+        return; // Do not proceed with deletion
+      }
+
+      // Handle CASCADE constraints
+      if (constraintResult.cascade_t) {
+        if (!confirm(constraintResult.message + "Do you want to proceed with deletion?")) {
+          return; // Do not delete if canceled
+        }
+        // else, proceed to delete (below)
+      }
+    
+    } else if (constraintResult.status === "error") {
+      showMessage(containerId, constraintResult.message, true);
+      return;
+    }
+    
+    // proceed to delete
+    const deleteResponse = await fetch(`/api/delete/${table}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(keys),
+    });
+
+    const deleteResult = await deleteResponse.json();
+    showMessage(containerId, deleteResult.message, deleteResult.status === "error");
+  } catch (error) {
+    console.error("Error deleting record:", error);
+  }
+}
+
+async function updateRecord(table, containerId) {
+  const inputs = document.querySelectorAll(`#${containerId} input`);
+  const updatedData = {};
+
+  inputs.forEach((input) => {
+    updatedData[input.name] = input.value;
+  });
+
+  try {
+    const response = await fetch(`/api/update/${table}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedData),
+    });
+
+    const result = await response.json();
+    console.log(result);
+    showMessage(containerId, result.message, result.status === "error");
+  } catch (error) {
+    console.error("Error updating record:", error);
   }
 }
 
@@ -285,6 +445,9 @@ function closeModal(modalId) {
   if (formContainer) formContainer.innerHTML = "";
   const resultsContainer = document.getElementById("analysis-results");
   if (resultsContainer) resultsContainer.innerHTML = "";
+  
+  const cards = document.querySelectorAll(".card");
+  cards.forEach((c) => c.classList.remove("active"));
 }
 
 // Load table form based on operation type
@@ -296,28 +459,39 @@ async function loadTableForm(operation) {
     const response = await fetch(`/api/table-schema/${table}`);
     const schema = await response.json();
 
-    const formContainer = document.getElementById(
-      `${operation}-form-container`
-    );
-    formContainer.innerHTML = "";
+    const formContainer = document.getElementById(`${operation}-form-container`);
+    formContainer.innerHTML = ""; // Clear the container
 
-    const form = document.createElement("form");
-    form.id = `${operation}-form`;
-    form.onsubmit = (e) => handleFormSubmit(e, operation, table);
+    let formHTML = `<form id="${operation}-form">`;
 
+    // Create form rows for each field
     schema.forEach((field) => {
-      const formRow = createFormField(field, operation);
-      form.appendChild(formRow);
+      formHTML += `
+        <div class="form-group">
+          <label>${field.name.replace(/_/g, " ")}</label>
+          <input 
+            type="${field.type === "number" ? "number" : "text"}" 
+            id="${field.name}-field" 
+            name="${field.name}" 
+            ${field.required ? "required" : ""} 
+            placeholder="Enter ${field.name.replace(/_/g, " ")}" />
+        </div>
+      `;
     });
 
-    // Add submit button
-    const submitBtn = document.createElement("button");
-    submitBtn.type = "submit";
-    submitBtn.textContent =
-      operation.charAt(0).toUpperCase() + operation.slice(1);
-    form.appendChild(submitBtn);
+    // Add a submit button
+    formHTML += `
+      <button type="submit">
+        ${operation.charAt(0).toUpperCase() + operation.slice(1)}
+      </button>
+    `;
+    formHTML += "</form>";
 
-    formContainer.appendChild(form);
+    formContainer.innerHTML = formHTML;
+
+    // Attach event handler to the form
+    const form = document.getElementById(`${operation}-form`);
+    form.addEventListener("submit", (e) => handleFormSubmit(e, operation, table));
   } catch (error) {
     console.error("Error loading table schema:", error);
   }

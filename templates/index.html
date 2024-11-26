@@ -98,14 +98,12 @@
       <!-- Insert Modal -->
       <div id="insert-modal" class="modal">
         <div class="modal-content">
-          <span class="close" onclick="closeModal('insert-modal')"
-            >&times;</span
-          >
+          <span class="close" onclick="closeModal('insert-modal')">&times;</span>
           <h2>Insert Data</h2>
           <div class="form-group">
             <label for="insert-table">Select Table:</label>
             <select id="insert-table" onchange="loadTableForm('insert')">
-              <option value="">Select a table...</option>
+              <option value="">Choose a table...</option>
             </select>
           </div>
           <div id="insert-form-container" class="form-container"></div>
@@ -115,36 +113,38 @@
       <!-- Update Modal -->
       <div id="update-modal" class="modal">
         <div class="modal-content">
-          <span class="close" onclick="closeModal('update-modal')"
-            >&times;</span
-          >
+          <span class="close" onclick="closeModal('update-modal')">&times;</span>
           <h2>Update Data</h2>
           <div class="form-group">
             <label for="update-table">Select Table:</label>
-            <select id="update-table" onchange="loadTableForm('update')">
-              <option value="">Select a table...</option>
+            <select id="update-table" onchange="loadPrimaryKeys(this.value, 'update-form-container', delrecord=false)">
+              <option value="">Choose a table...</option>
+              <!-- Populate dynamically -->
             </select>
           </div>
-          <div id="update-form-container" class="form-container"></div>
+          <div id="update-form-container"></div>
+          <div id="update-message"></div>
         </div>
       </div>
+
 
       <!-- Delete Modal -->
       <div id="delete-modal" class="modal">
         <div class="modal-content">
-          <span class="close" onclick="closeModal('delete-modal')"
-            >&times;</span
-          >
+          <span class="close" onclick="closeModal('delete-modal')">&times;</span>
           <h2>Delete Data</h2>
           <div class="form-group">
             <label for="delete-table">Select Table:</label>
-            <select id="delete-table" onchange="loadTableForm('delete')">
-              <option value="">Select a table...</option>
+            <select id="delete-table" onchange="loadPrimaryKeys(this.value, 'delete-form-container', delrecord=true)">
+              <option value="">Choose a table...</option>
+              <!-- Populate dynamically -->
             </select>
           </div>
-          <div id="delete-form-container" class="form-container"></div>
+          <div id="delete-form-container"></div>
+          <div id="delete-message"></div>
         </div>
       </div>
+      
 
       <!-- Analysis Modal -->
       <div id="analysis-modal" class="modal">
