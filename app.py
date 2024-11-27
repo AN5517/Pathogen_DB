@@ -471,6 +471,46 @@ def get_project_success_metrics():
     conn.close()
     return jsonify(result)
 
+@app.route('/api/analysis/high-severity-countries')
+def analysis_high_severity_countries():
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        cursor.execute("""
+            SELECT COUNT(DISTINCT gr.country_id) AS high_severity_country_count
+            FROM Government_response gr
+            JOIN Response_effect re ON gr.response_id = re.response_id
+            JOIN Pathogen p ON re.pathogen_id = p.id
+            WHERE re.response_severity = 'High' AND p.lethality_rate > 0
+        """)
+        
+        result = cursor.fetchone()
+        conn.close()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+@app.route('/api/analysis/airborne-pathogen-funding')
+def analysis_airborne_pathogen_funding():
+    conn = get_db_connection()
+    cursor = conn.cursor(pymysql.cursors.DictCursor)
+    
+    try:
+        cursor.execute("""
+            SELECT SUM(pul.funding_allocated) AS total_airborne_funding
+            FROM Project_under_lab pul
+            JOIN Research_project rp ON pul.project_id = rp.project_id
+            JOIN Pathogen p ON rp.pathogen_id = p.id
+            WHERE p.transmission_method = 'Airborne'
+        """)
+        
+        result = cursor.fetchone()
+        conn.close()
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error':str(e)}),500
+
 @app.route('/api/tables', methods=['GET'])
 def get_tables():
     conn = get_db_connection()

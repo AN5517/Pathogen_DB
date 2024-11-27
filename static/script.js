@@ -18,7 +18,7 @@ function createTable(data, containerId) {
   data.forEach((row) => {
     table += "<tr>";
     headers.forEach((header) => {
-      table += `<td>${row[header] ?? ""}</td>`;
+      table += `<td>${row[header]}</td>`;
     });
     table += "</tr>";
   });
@@ -553,6 +553,7 @@ async function handleFormSubmit(event, operation, table) {
 }
 
 // Load analysis results
+// Load analysis results
 async function loadAnalysis(type) {
   const resultsContainer = document.getElementById("analysis-results");
   resultsContainer.innerHTML = "<p>Loading...</p>";
@@ -562,29 +563,55 @@ async function loadAnalysis(type) {
     const data = await response.json();
 
     // Create table from data
-    console.log(data);
-    let table = "<table><thead><tr>";
-    const headers = Object.keys(data[0] || {});
-    headers.forEach((header) => {
-      table += `<th>${header.replace(/_/g, " ")}</th>`;
-    });
-    table += "</tr></thead><tbody>";
-
-    data.forEach((row) => {
-      table += "<tr>";
+    if (Array.isArray(data)) {
+      createTable(data, "analysis-results");
+    } else {
+      let table = "<table><thead><tr>";
+      const headers = Object.keys(data);
       headers.forEach((header) => {
-        table += `<td>${row[header]}</td>`;
+        table += `<th>${header.replace(/_/g, " ").toUpperCase()}</th>`;
       });
-      table += "</tr>";
-    });
-    table += "</tbody></table>";
-
-    resultsContainer.innerHTML = table;
+      table += "</tr></thead><tbody><tr>";
+      headers.forEach((header) => {
+        table += `<td>${data[header]}</td>`;
+      });
+      table += "</tr></tbody></table>";
+      resultsContainer.innerHTML = table;
+    }
   } catch (error) {
     resultsContainer.innerHTML =
       '<p class="error-message">Error loading analysis results.</p>';
   }
 }
+
+// Utility function to create tables from JSON data
+// function createTable(data, containerId) {
+//   if (data.length === 0) {
+//     document.getElementById(containerId).innerHTML = "<p>No data available</p>";
+//     return;
+//   }
+
+//   const headers = Object.keys(data[0]);
+//   let table = "<table><thead><tr>";
+
+//   // Create headers
+//   headers.forEach((header) => {
+//     table += <th>${header.replace(/_/g, " ").toUpperCase()}</th>;
+//   });
+//   table += "</tr></thead><tbody>";
+
+//   // Create rows
+//   data.forEach((row) => {
+//     table += "<tr>";
+//     headers.forEach((header) => {
+//       table += <td>${row[header]}</td>;
+//     });
+//     table += "</tr>";
+//   });
+
+//   table += "</tbody></table>";
+//   document.getElementById(containerId).innerHTML = table;
+// }
 
 // Show message function
 function showMessage(message, isError = false) {
