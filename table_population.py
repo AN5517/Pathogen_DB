@@ -553,9 +553,6 @@ mutations_data = [
 for mutation in mutations_data:
     insert_mutation(*mutation)
 
-
-#0f0 add the new table 'Response_effect' and populate it    # done?
-
 create_response_effect_sql = """
 CREATE TABLE IF NOT EXISTS Response_effect (
     response_id VARCHAR(255) NOT NULL,
