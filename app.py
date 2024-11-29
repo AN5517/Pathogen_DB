@@ -60,6 +60,7 @@ def get_data(table):
         # Fetch the record matching the composite key
         cursor.execute(f"SELECT * FROM {table} WHERE {where_clause}", values)
         result = cursor.fetchone()
+        print(result)
 
         if not result:
             return jsonify({'status': 'error', 'message': 'No matching record found'}), 404
@@ -239,14 +240,15 @@ def update_data(table):
         primary_key_val = [data.pop(key) for key in primary_key_attr]
         print("we reached here")
         
-        set_clause = ', '.join([f"{key} = %s" for key in data.keys()])
+        columns = [key for key in data.keys() if str(data[key])]
+        values_to_set = [data[key] for key in columns]
+        
+        set_clause = ', '.join([f"{key} = %s" for key in columns])
         where_clause = ' AND '.join([f"{key} = %s" for key in primary_key_attr])
         sql = f"UPDATE {table} SET {set_clause} WHERE {where_clause}"
-        print(sql)
-        print(tuple(data.values()) + tuple(primary_key_val))
-        print(sql % (tuple(data.values()) + tuple(primary_key_val)))
+        print(sql % (tuple(columns) + tuple(primary_key_val)))
         
-        cursor.execute(sql, tuple(data.values()) + tuple(primary_key_val))
+        cursor.execute(sql, tuple(values_to_set) + tuple(primary_key_val))
         conn.commit()
         return jsonify({'status': 'success', 'message': 'Data updated successfully'})
     except Exception as e:
@@ -297,26 +299,26 @@ def read_table(table):
         conn.close()
 
 # Update specific attribute
-@app.route('/api/update/<table>', methods=['POST'])
-def update_attribute(table):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        data = request.json
-        column_to_update = data.get('column')
-        value = data.get('value')
-        identifier_column = data.get('identifier_column')
-        identifier_value = data.get('identifier_value')
+# @app.route('/api/update/<table>', methods=['POST'])
+# def update_attribute(table):
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+#     try:
+#         data = request.json
+#         column_to_update = data.get('column')
+#         value = data.get('value')
+#         identifier_column = data.get('identifier_column')
+#         identifier_value = data.get('identifier_value')
 
-        sql = f"UPDATE {table} SET {column_to_update} = %s WHERE {identifier_column} = %s"
-        cursor.execute(sql, (value, identifier_value))
-        conn.commit()
-        return jsonify({'status': 'success', 'message': 'Record updated successfully'})
-    except Exception as e:
-        conn.rollback()
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-    finally:
-        conn.close()
+#         sql = f"UPDATE {table} SET {column_to_update} = %s WHERE {identifier_column} = %s"
+#         cursor.execute(sql, (value, identifier_value))
+#         conn.commit()
+#         return jsonify({'status': 'success', 'message': 'Record updated successfully'})
+#     except Exception as e:
+#         conn.rollback()
+#         return jsonify({'status': 'error', 'message': str(e)}), 500
+#     finally:
+#         conn.close()
 
 # Delete specific row
 # @app.route('/api/delete/<table>', methods=['POST'])

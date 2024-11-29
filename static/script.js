@@ -28,14 +28,17 @@ function createTable(data, containerId) {
 }
 
 // Show message function
-function showMessage(containerId, message, isError = false) {
-  const messageDiv = document.getElementById(containerId);
-  messageDiv.textContent = message;
-  messageDiv.className = `message ${isError ? "error" : "success"}`;
-  setTimeout(() => {
-    messageDiv.className = "message";
-  }, 10000);
-}
+// function showMessage(containerId, message, isError = false) {
+//   console.log("got called with: ");
+//   console.log(containerId);
+
+//   const messageDiv = document.getElementById(containerId);
+//   messageDiv.textContent = message;
+//   messageDiv.className = `message ${isError ? "error" : "success"}`;
+//   setTimeout(() => {
+//     messageDiv.className = "message";
+//   }, 10000);
+// }
 
 // Load High Risk Pathogens
 async function loadHighRiskPathogens() {
@@ -62,7 +65,10 @@ async function loadPrimaryKeys(table, containerId, delrecord=false) {
     const result = await response.json();
 
     if (result.status === "error") {
-      showMessage(containerId, result.message, true);
+      showMessage(
+        containerId,
+        result.message,
+        true);
       return;
     }
 
@@ -107,9 +113,15 @@ async function loadRecord(table, containerId, editable = true) {
     });
 
     const result = await response.json();
-
+    console.log(result);
+    console.log(result.status === "error");
     if (result.status === "error") {
-      showMessage(containerId, result.message, true);
+      console.log("entered here...");
+      console.log(containerId);
+      showMessage(
+        containerId, 
+        result.message, 
+        true);
       return;
     }
 
@@ -121,7 +133,7 @@ async function loadRecord(table, containerId, editable = true) {
           <label>${key.replace(/_/g, " ")}</label>
           <input 
             type="text" 
-            value="${data[key]}" 
+            value="${data[key] === null ? "" : data[key] }" 
             ${editable ? "" : "readonly"} 
             id="${key}-field"
             name="${key}"
@@ -168,14 +180,17 @@ async function deleteRecord(table, containerId) {
 
       // Handle CASCADE constraints
       if (constraintResult.cascade_t) {
-        if (!confirm(constraintResult.message + "Do you want to proceed with deletion?")) {
+        if (!confirm(constraintResult.message + " Do you want to proceed with deletion?")) {
           return; // Do not delete if canceled
         }
         // else, proceed to delete (below)
       }
     
     } else if (constraintResult.status === "error") {
-      showMessage(containerId, constraintResult.message, true);
+      showMessage(
+        containerId, 
+        constraintResult.message, 
+        true);
       return;
     }
     
@@ -187,7 +202,10 @@ async function deleteRecord(table, containerId) {
     });
 
     const deleteResult = await deleteResponse.json();
-    showMessage(containerId, deleteResult.message, deleteResult.status === "error");
+    showMessage(
+      containerId, 
+      deleteResult.message,
+      deleteResult.status === 'error');
   } catch (error) {
     console.error("Error deleting record:", error);
   }
@@ -210,7 +228,10 @@ async function updateRecord(table, containerId) {
 
     const result = await response.json();
     console.log(result);
-    showMessage(containerId, result.message, result.status === "error");
+    showMessage(
+      containerId, 
+      result.message, 
+      result.status === "error");
   } catch (error) {
     console.error("Error updating record:", error);
   }
@@ -262,96 +283,102 @@ async function loadProjectSuccess() {
 }
 
 // Update Vaccine Effectiveness
-async function updateVaccineEffectiveness() {
-  const vaccineId = document.getElementById("vaccineId").value;
-  const effectiveness = document.getElementById("vaccineEffectiveness").value;
+// async function updateVaccineEffectiveness() {
+//   const vaccineId = document.getElementById("vaccineId").value;
+//   const effectiveness = document.getElementById("vaccineEffectiveness").value;
 
-  try {
-    const response = await fetch("/api/update_vaccine_effectiveness", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        vaccine_id: vaccineId,
-        effectiveness: effectiveness,
-      }),
-    });
+//   try {
+//     const response = await fetch("/api/update_vaccine_effectiveness", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         vaccine_id: vaccineId,
+//         effectiveness: effectiveness,
+//       }),
+//     });
 
-    const result = await response.json();
-    showMessage(
-      "vaccineUpdateMessage",
-      result.message,
-      result.status === "error"
-    );
-  } catch (error) {
-    showMessage(
-      "vaccineUpdateMessage",
-      "Failed to update vaccine effectiveness",
-      true
-    );
-  }
-}
+//     const result = await response.json();
+//     showMessage(
+//       // "vaccineUpdateMessage",
+//       result.message,
+//       result.status === "error"
+//     );
+//   } catch (error) {
+//     showMessage(
+//       // "vaccineUpdateMessage",
+//       "Failed to update vaccine effectiveness",
+//       true
+//     );
+//   }
+// }
 
 // Update Project Status
-async function updateProjectStatus() {
-  const projectId = document.getElementById("projectId").value;
-  const status = document.getElementById("projectStatus").value;
+// async function updateProjectStatus() {
+//   const projectId = document.getElementById("projectId").value;
+//   const status = document.getElementById("projectStatus").value;
 
-  try {
-    const response = await fetch("/api/update_project_status", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        project_id: projectId,
-        status: status,
-        end_date:
-          status === "completed"
-            ? new Date().toISOString().split("T")[0]
-            : null,
-      }),
-    });
+//   try {
+//     const response = await fetch("/api/update_project_status", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         project_id: projectId,
+//         status: status,
+//         end_date:
+//           status === "completed"
+//             ? new Date().toISOString().split("T")[0]
+//             : null,
+//       }),
+//     });
 
-    const result = await response.json();
-    showMessage(
-      "projectUpdateMessage",
-      result.message,
-      result.status === "error"
-    );
-  } catch (error) {
-    showMessage(
-      "projectUpdateMessage",
-      "Failed to update project status",
-      true
-    );
-  }
-}
+//     const result = await response.json();
+//     showMessage(
+//       // "projectUpdateMessage",
+//       result.message,
+//       result.status === "error"
+//     );
+//   } catch (error) {
+//     showMessage(
+//       // "projectUpdateMessage",
+//       "Failed to update project status",
+//       true
+//     );
+//   }
+// }
 
 // Update Lab Funding
-async function updateLabFunding() {
-  const labId = document.getElementById("labId").value;
-  const fundingChange = document.getElementById("fundingChange").value;
+// async function updateLabFunding() {
+//   const labId = document.getElementById("labId").value;
+//   const fundingChange = document.getElementById("fundingChange").value;
 
-  try {
-    const response = await fetch("/api/update_lab_funding", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        lab_id: labId,
-        funding_change: fundingChange,
-      }),
-    });
+//   try {
+//     const response = await fetch("/api/update_lab_funding", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         lab_id: labId,
+//         funding_change: fundingChange,
+//       }),
+//     });
 
-    const result = await response.json();
-    showMessage("labUpdateMessage", result.message, result.status === "error");
-  } catch (error) {
-    showMessage("labUpdateMessage", "Failed to update lab funding", true);
-  }
-}
+//     const result = await response.json();
+//     showMessage(
+//       // "labUpdateMessage", 
+//       result.message, 
+//       result.status === "error");
+//   } catch (error) {
+//     showMessage(
+//       // "labUpdateMessage", 
+//       "Failed to update lab funding", 
+//       true);
+//   }
+// }
 
 // Add event listener when document loads
 document.addEventListener("DOMContentLoaded", function () {
@@ -491,7 +518,7 @@ async function loadTableForm(operation) {
 
     // Attach event handler to the form
     const form = document.getElementById(`${operation}-form`);
-    form.addEventListener("submit", (e) => handleFormSubmit(e, operation, table));
+    form.addEventListener("submit", (e) => handleFormSubmit(e, operation, table, formContainer.id));
   } catch (error) {
     console.error("Error loading table schema:", error);
   }
@@ -531,7 +558,7 @@ function createFormField(field, operation) {
 }
 
 // Handle form submission
-async function handleFormSubmit(event, operation, table) {
+async function handleFormSubmit(event, operation, table, containerId) {
   event.preventDefault();
   const formData = new FormData(event.target);
   const data = Object.fromEntries(formData.entries());
@@ -546,9 +573,15 @@ async function handleFormSubmit(event, operation, table) {
     });
 
     const result = await response.json();
-    showMessage(result.message, result.status === "error");
+    showMessage(
+      containerId,
+      result.message,
+      result.status === "error");
   } catch (error) {
-    showMessage("An error occurred while processing your request.", true);
+    showMessage(
+      containerId,
+      "An error occurred while processing your request.", 
+      true);
   }
 }
 
@@ -614,17 +647,22 @@ async function loadAnalysis(type) {
 // }
 
 // Show message function
-function showMessage(message, isError = false) {
+function showMessage(containerId, message, isError = false) {
   const messageDiv = document.createElement("div");
   messageDiv.className = isError ? "error-message" : "success-message";
   messageDiv.textContent = message;
 
-  const container = document.querySelector(".modal-content");
-  container.appendChild(messageDiv);
+  // const container = document.querySelector(".modal-content");
+  // console.log(container);
+  // console.log(container.children);
+  console.log(containerId);
+  const cont = document.getElementById(containerId);
+  console.log(cont);
+  cont.appendChild(messageDiv);
 
   setTimeout(() => {
     messageDiv.remove();
-  }, 3000);
+  }, 5000);
 }
 
 // Close modal when clicking outside
