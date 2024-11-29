@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request, render_template
 import pymysql
-from datetime import datetime
-import os
+
+from cred import mysqlpw, mysqluser
+
 
 DB_NAME = 'Pathogen'
 app = Flask(__name__, static_url_path='/static')
@@ -9,8 +10,8 @@ app = Flask(__name__, static_url_path='/static')
 def get_db_connection():
     return pymysql.connect(
         host="localhost",
-        user="root",
-        password="agn1705mY5ql",
+        user=mysqluser,
+        password=mysqlpw,
         database="pathogen"
     )
 
@@ -77,13 +78,6 @@ def check_constraints(table):
     cursor = conn.cursor()
     try:
         data = request.json
-        
-        # primary key where clause
-        # primary_key_attr = query_primary_keys(table)
-        # primary_key_val = [data[key] for key in primary_key_attr]
-        # where_clause = " AND ".join([f"{table}.{col} = %s" for col in primary_key_attr])
-        # values = tuple(data.values())
-        # print(f"{values=}")
 
         # Check for dependent records in foreign key tables
         cursor.execute(f"""
@@ -108,6 +102,7 @@ def check_constraints(table):
         
         cascade_triggers = []
         restrict_triggers = []
+        # Constants for indexing sql output table
         (
             KDEPENDENT_TABLE, KDELETE_RULE, KCONSTRAINT_NAME, KDEPENDENT_COLUMN, KREFERENCED_COLUMN 
         ) = (
@@ -129,11 +124,11 @@ def check_constraints(table):
                     if constraint[KDELETE_RULE] == 'CASCADE':
                         cascade_triggers.append({'table': dependent_table})
                     else:
-                        # restrict is same as no action for foreign key constraints
-                        # we have no other referential constraint than foreign keys anyway
+                        # RESTRICT is same as NO ACTION for foreign key constraints
+                        # We have no other referential constraints than foreign keys anyway
                         restrict_triggers.append({'table': dependent_table})
                 
-
+        # Prepare warning response in case of warning, else return successful response
         warning_resp = {
             'status': 'warning',
             'message': '',
@@ -298,58 +293,11 @@ def read_table(table):
     finally:
         conn.close()
 
-# Update specific attribute
-# @app.route('/api/update/<table>', methods=['POST'])
-# def update_attribute(table):
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-#     try:
-#         data = request.json
-#         column_to_update = data.get('column')
-#         value = data.get('value')
-#         identifier_column = data.get('identifier_column')
-#         identifier_value = data.get('identifier_value')
-
-#         sql = f"UPDATE {table} SET {column_to_update} = %s WHERE {identifier_column} = %s"
-#         cursor.execute(sql, (value, identifier_value))
-#         conn.commit()
-#         return jsonify({'status': 'success', 'message': 'Record updated successfully'})
-#     except Exception as e:
-#         conn.rollback()
-#         return jsonify({'status': 'error', 'message': str(e)}), 500
-#     finally:
-#         conn.close()
-
-# Delete specific row
-# @app.route('/api/delete/<table>', methods=['POST'])
-# def delete_row(table):
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-#     try:
-#         data = request.json
-#         identifier_column = data.get('identifier_column')
-#         identifier_value = data.get('identifier_value')
-
-#         sql = f"DELETE FROM {table} WHERE {identifier_column} = %s"
-#         cursor.execute(sql, (identifier_value,))
-#         conn.commit()
-#         return jsonify({'status': 'success', 'message': 'Record deleted successfully'})
-#     except Exception as e:
-#         conn.rollback()
-#         return jsonify({'status': 'error', 'message': str(e)}), 500
-#     finally:
-#         conn.close()
-
 # Analysis Routes
 @app.route('/api/analysis/high-risk')
 def analysis_high_risk():
     threshold = request.args.get('threshold', default=0, type=float)
     return get_high_risk_pathogens(threshold)
-
-# @app.route('/api/analysis/research-labs')
-# def analysis_research_labs():
-#     pathogen_type = request.args.get('pathogen_type', default='', type=str)
-#     return get_labs_by_pathogen_type(pathogen_type)
 
 @app.route('/api/analysis/vaccine-distribution')
 def analysis_vaccine_distribution():
@@ -385,24 +333,6 @@ def get_high_risk_pathogens(threshold):
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-# @app.route('/api/labs_by_pathogen_type/<pathogen_type>')
-# def get_labs_by_pathogen_type(pathogen_type):
-#     conn = get_db_connection()
-#     cursor = conn.cursor(pymysql.cursors.DictCursor)
-    
-#     cursor.execute("""
-#         SELECT DISTINCT rl.lab_id, rl.name, rl.total_funding, c.name as country
-#         FROM Research_lab rl
-#         JOIN Research_focus rf ON rl.lab_id = rf.lab_id
-#         JOIN Pathogen p ON rf.pathogen_id = p.id
-#         JOIN Country c ON rl.location = c.country_id
-#         WHERE p.type = %s
-#     """, (pathogen_type,))
-    
-#     result = cursor.fetchall()
-#     conn.close()
-#     return jsonify(result)
 
 @app.route('/api/vaccine_distribution_stats')
 def get_vaccine_distribution_stats():
