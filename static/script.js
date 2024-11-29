@@ -18,7 +18,7 @@ function createTable(data, containerId) {
   data.forEach((row) => {
     table += "<tr>";
     headers.forEach((header) => {
-      table += `<td>${row[header] ?? ""}</td>`;
+      table += `<td>${row[header]}</td>`;
     });
     table += "</tr>";
   });
@@ -28,14 +28,17 @@ function createTable(data, containerId) {
 }
 
 // Show message function
-function showMessage(containerId, message, isError = false) {
-  const messageDiv = document.getElementById(containerId);
-  messageDiv.textContent = message;
-  messageDiv.className = `message ${isError ? "error" : "success"}`;
-  setTimeout(() => {
-    messageDiv.className = "message";
-  }, 3000);
-}
+// function showMessage(containerId, message, isError = false) {
+//   console.log("got called with: ");
+//   console.log(containerId);
+
+//   const messageDiv = document.getElementById(containerId);
+//   messageDiv.textContent = message;
+//   messageDiv.className = `message ${isError ? "error" : "success"}`;
+//   setTimeout(() => {
+//     messageDiv.className = "message";
+//   }, 10000);
+// }
 
 // Load High Risk Pathogens
 async function loadHighRiskPathogens() {
@@ -53,6 +56,184 @@ async function loadHighRiskPathogens() {
     console.error("Error:", error);
     document.getElementById("highRiskPathogensTable").innerHTML =
       '<p class="error">Error loading pathogen data. Please try again.</p>';
+  }
+}
+
+async function loadPrimaryKeys(table, containerId, delrecord=false) {
+  try {
+    const response = await fetch(`/api/get_primary_keys/${table}`);
+    const result = await response.json();
+
+    if (result.status === "error") {
+      showMessage(
+        containerId,
+        result.message,
+        true);
+      return;
+    }
+
+    const primaryKeys = result.primary_keys;
+    const formContainer = document.getElementById(containerId);
+
+    formContainer.innerHTML = "";
+    primaryKeys.forEach((key) => {
+      formContainer.innerHTML += `
+        <div class="form-group">
+          <label>${key.replace(/_/g, " ")}</label>
+          <input type="text" id="${key}-field" name="${key}" required />
+        </div>
+      `;
+    });
+
+    const editablerec = (delrecord === true ? false : true)
+    formContainer.innerHTML += `
+      <button type="button" onclick="loadRecord('${table}', '${containerId}', ${editablerec ? "true" : "false"})">
+        Load Record
+      </button>
+    `;
+  } catch (error) {
+    console.error("Error loading primary keys:", error);
+  }
+}
+
+async function loadRecord(table, containerId, editable = true) {
+  const formContainer = document.getElementById(containerId);
+  const inputs = formContainer.querySelectorAll("input");
+  const keys = {};
+
+  inputs.forEach((input) => {
+    keys[input.name] = input.value;
+  });
+
+  try {
+    const response = await fetch(`/api/get/${table}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(keys),
+    });
+
+    const result = await response.json();
+    console.log(result);
+    console.log(result.status === "error");
+    if (result.status === "error") {
+      console.log("entered here...");
+      console.log(containerId);
+      showMessage(
+        containerId, 
+        result.message, 
+        true);
+      return;
+    }
+
+    const data = result.data;
+    let formHTML = "<form>";
+    for (const key in data) {
+      formHTML += `
+        <div class="form-group">
+          <label>${key.replace(/_/g, " ")}</label>
+          <input 
+            type="text" 
+            value="${data[key] === null ? "" : data[key] }" 
+            ${editable ? "" : "readonly"} 
+            id="${key}-field"
+            name="${key}"
+          />
+        </div>
+      `;
+    }
+
+    formHTML += `
+      <button type="button" onclick="${editable ? "updateRecord" : "deleteRecord"}('${table}', '${containerId}')">
+        ${editable ? "Update Values" : "Delete"}
+      </button>
+    </form>`;
+    formContainer.innerHTML = formHTML;
+  } catch (error) {
+    console.error("Error loading record:", error);
+  }
+}
+
+async function deleteRecord(table, containerId) {
+  const inputs = document.querySelectorAll(`#${containerId} input`);
+  const keys = {};
+
+  inputs.forEach((input) => {
+    keys[input.name] = input.value;
+  });
+
+  try {
+    const constraintResponse = await fetch(`/api/check_constraints/${table}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(keys),
+    });
+
+    const constraintResult = await constraintResponse.json();
+    console.log(constraintResult);
+
+    if (constraintResult.status === "warning") {
+      // Handle RESTRICT constraints
+      if (constraintResult.restrict_t) {
+        alert(constraintResult.message + " Cannot delete."); // Show message for RESTRICT
+        return; // Do not proceed with deletion
+      }
+
+      // Handle CASCADE constraints
+      if (constraintResult.cascade_t) {
+        if (!confirm(constraintResult.message + " Do you want to proceed with deletion?")) {
+          return; // Do not delete if canceled
+        }
+        // else, proceed to delete (below)
+      }
+    
+    } else if (constraintResult.status === "error") {
+      showMessage(
+        containerId, 
+        constraintResult.message, 
+        true);
+      return;
+    }
+    
+    // proceed to delete
+    const deleteResponse = await fetch(`/api/delete/${table}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(keys),
+    });
+
+    const deleteResult = await deleteResponse.json();
+    showMessage(
+      containerId, 
+      deleteResult.message,
+      deleteResult.status === 'error');
+  } catch (error) {
+    console.error("Error deleting record:", error);
+  }
+}
+
+async function updateRecord(table, containerId) {
+  const inputs = document.querySelectorAll(`#${containerId} input`);
+  const updatedData = {};
+
+  inputs.forEach((input) => {
+    updatedData[input.name] = input.value;
+  });
+
+  try {
+    const response = await fetch(`/api/update/${table}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedData),
+    });
+
+    const result = await response.json();
+    console.log(result);
+    showMessage(
+      containerId, 
+      result.message, 
+      result.status === "error");
+  } catch (error) {
+    console.error("Error updating record:", error);
   }
 }
 
@@ -102,96 +283,102 @@ async function loadProjectSuccess() {
 }
 
 // Update Vaccine Effectiveness
-async function updateVaccineEffectiveness() {
-  const vaccineId = document.getElementById("vaccineId").value;
-  const effectiveness = document.getElementById("vaccineEffectiveness").value;
+// async function updateVaccineEffectiveness() {
+//   const vaccineId = document.getElementById("vaccineId").value;
+//   const effectiveness = document.getElementById("vaccineEffectiveness").value;
 
-  try {
-    const response = await fetch("/api/update_vaccine_effectiveness", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        vaccine_id: vaccineId,
-        effectiveness: effectiveness,
-      }),
-    });
+//   try {
+//     const response = await fetch("/api/update_vaccine_effectiveness", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         vaccine_id: vaccineId,
+//         effectiveness: effectiveness,
+//       }),
+//     });
 
-    const result = await response.json();
-    showMessage(
-      "vaccineUpdateMessage",
-      result.message,
-      result.status === "error"
-    );
-  } catch (error) {
-    showMessage(
-      "vaccineUpdateMessage",
-      "Failed to update vaccine effectiveness",
-      true
-    );
-  }
-}
+//     const result = await response.json();
+//     showMessage(
+//       // "vaccineUpdateMessage",
+//       result.message,
+//       result.status === "error"
+//     );
+//   } catch (error) {
+//     showMessage(
+//       // "vaccineUpdateMessage",
+//       "Failed to update vaccine effectiveness",
+//       true
+//     );
+//   }
+// }
 
 // Update Project Status
-async function updateProjectStatus() {
-  const projectId = document.getElementById("projectId").value;
-  const status = document.getElementById("projectStatus").value;
+// async function updateProjectStatus() {
+//   const projectId = document.getElementById("projectId").value;
+//   const status = document.getElementById("projectStatus").value;
 
-  try {
-    const response = await fetch("/api/update_project_status", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        project_id: projectId,
-        status: status,
-        end_date:
-          status === "completed"
-            ? new Date().toISOString().split("T")[0]
-            : null,
-      }),
-    });
+//   try {
+//     const response = await fetch("/api/update_project_status", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         project_id: projectId,
+//         status: status,
+//         end_date:
+//           status === "completed"
+//             ? new Date().toISOString().split("T")[0]
+//             : null,
+//       }),
+//     });
 
-    const result = await response.json();
-    showMessage(
-      "projectUpdateMessage",
-      result.message,
-      result.status === "error"
-    );
-  } catch (error) {
-    showMessage(
-      "projectUpdateMessage",
-      "Failed to update project status",
-      true
-    );
-  }
-}
+//     const result = await response.json();
+//     showMessage(
+//       // "projectUpdateMessage",
+//       result.message,
+//       result.status === "error"
+//     );
+//   } catch (error) {
+//     showMessage(
+//       // "projectUpdateMessage",
+//       "Failed to update project status",
+//       true
+//     );
+//   }
+// }
 
 // Update Lab Funding
-async function updateLabFunding() {
-  const labId = document.getElementById("labId").value;
-  const fundingChange = document.getElementById("fundingChange").value;
+// async function updateLabFunding() {
+//   const labId = document.getElementById("labId").value;
+//   const fundingChange = document.getElementById("fundingChange").value;
 
-  try {
-    const response = await fetch("/api/update_lab_funding", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        lab_id: labId,
-        funding_change: fundingChange,
-      }),
-    });
+//   try {
+//     const response = await fetch("/api/update_lab_funding", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({
+//         lab_id: labId,
+//         funding_change: fundingChange,
+//       }),
+//     });
 
-    const result = await response.json();
-    showMessage("labUpdateMessage", result.message, result.status === "error");
-  } catch (error) {
-    showMessage("labUpdateMessage", "Failed to update lab funding", true);
-  }
-}
+//     const result = await response.json();
+//     showMessage(
+//       // "labUpdateMessage", 
+//       result.message, 
+//       result.status === "error");
+//   } catch (error) {
+//     showMessage(
+//       // "labUpdateMessage", 
+//       "Failed to update lab funding", 
+//       true);
+//   }
+// }
 
 // Add event listener when document loads
 document.addEventListener("DOMContentLoaded", function () {
@@ -285,6 +472,9 @@ function closeModal(modalId) {
   if (formContainer) formContainer.innerHTML = "";
   const resultsContainer = document.getElementById("analysis-results");
   if (resultsContainer) resultsContainer.innerHTML = "";
+  
+  const cards = document.querySelectorAll(".card");
+  cards.forEach((c) => c.classList.remove("active"));
 }
 
 // Load table form based on operation type
@@ -296,28 +486,39 @@ async function loadTableForm(operation) {
     const response = await fetch(`/api/table-schema/${table}`);
     const schema = await response.json();
 
-    const formContainer = document.getElementById(
-      `${operation}-form-container`
-    );
-    formContainer.innerHTML = "";
+    const formContainer = document.getElementById(`${operation}-form-container`);
+    formContainer.innerHTML = ""; // Clear the container
 
-    const form = document.createElement("form");
-    form.id = `${operation}-form`;
-    form.onsubmit = (e) => handleFormSubmit(e, operation, table);
+    let formHTML = `<form id="${operation}-form">`;
 
+    // Create form rows for each field
     schema.forEach((field) => {
-      const formRow = createFormField(field, operation);
-      form.appendChild(formRow);
+      formHTML += `
+        <div class="form-group">
+          <label>${field.name.replace(/_/g, " ")}</label>
+          <input 
+            type="${field.type === "number" ? "number" : "text"}" 
+            id="${field.name}-field" 
+            name="${field.name}" 
+            ${field.required ? "required" : ""} 
+            placeholder="Enter ${field.name.replace(/_/g, " ")}" />
+        </div>
+      `;
     });
 
-    // Add submit button
-    const submitBtn = document.createElement("button");
-    submitBtn.type = "submit";
-    submitBtn.textContent =
-      operation.charAt(0).toUpperCase() + operation.slice(1);
-    form.appendChild(submitBtn);
+    // Add a submit button
+    formHTML += `
+      <button type="submit">
+        ${operation.charAt(0).toUpperCase() + operation.slice(1)}
+      </button>
+    `;
+    formHTML += "</form>";
 
-    formContainer.appendChild(form);
+    formContainer.innerHTML = formHTML;
+
+    // Attach event handler to the form
+    const form = document.getElementById(`${operation}-form`);
+    form.addEventListener("submit", (e) => handleFormSubmit(e, operation, table, formContainer.id));
   } catch (error) {
     console.error("Error loading table schema:", error);
   }
@@ -357,7 +558,7 @@ function createFormField(field, operation) {
 }
 
 // Handle form submission
-async function handleFormSubmit(event, operation, table) {
+async function handleFormSubmit(event, operation, table, containerId) {
   event.preventDefault();
   const formData = new FormData(event.target);
   const data = Object.fromEntries(formData.entries());
@@ -372,12 +573,19 @@ async function handleFormSubmit(event, operation, table) {
     });
 
     const result = await response.json();
-    showMessage(result.message, result.status === "error");
+    showMessage(
+      containerId,
+      result.message,
+      result.status === "error");
   } catch (error) {
-    showMessage("An error occurred while processing your request.", true);
+    showMessage(
+      containerId,
+      "An error occurred while processing your request.", 
+      true);
   }
 }
 
+// Load analysis results
 // Load analysis results
 async function loadAnalysis(type) {
   const resultsContainer = document.getElementById("analysis-results");
@@ -388,42 +596,73 @@ async function loadAnalysis(type) {
     const data = await response.json();
 
     // Create table from data
-    console.log(data);
-    let table = "<table><thead><tr>";
-    const headers = Object.keys(data[0] || {});
-    headers.forEach((header) => {
-      table += `<th>${header.replace(/_/g, " ")}</th>`;
-    });
-    table += "</tr></thead><tbody>";
-
-    data.forEach((row) => {
-      table += "<tr>";
+    if (Array.isArray(data)) {
+      createTable(data, "analysis-results");
+    } else {
+      let table = "<table><thead><tr>";
+      const headers = Object.keys(data);
       headers.forEach((header) => {
-        table += `<td>${row[header]}</td>`;
+        table += `<th>${header.replace(/_/g, " ").toUpperCase()}</th>`;
       });
-      table += "</tr>";
-    });
-    table += "</tbody></table>";
-
-    resultsContainer.innerHTML = table;
+      table += "</tr></thead><tbody><tr>";
+      headers.forEach((header) => {
+        table += `<td>${data[header]}</td>`;
+      });
+      table += "</tr></tbody></table>";
+      resultsContainer.innerHTML = table;
+    }
   } catch (error) {
     resultsContainer.innerHTML =
       '<p class="error-message">Error loading analysis results.</p>';
   }
 }
 
+// Utility function to create tables from JSON data
+// function createTable(data, containerId) {
+//   if (data.length === 0) {
+//     document.getElementById(containerId).innerHTML = "<p>No data available</p>";
+//     return;
+//   }
+
+//   const headers = Object.keys(data[0]);
+//   let table = "<table><thead><tr>";
+
+//   // Create headers
+//   headers.forEach((header) => {
+//     table += <th>${header.replace(/_/g, " ").toUpperCase()}</th>;
+//   });
+//   table += "</tr></thead><tbody>";
+
+//   // Create rows
+//   data.forEach((row) => {
+//     table += "<tr>";
+//     headers.forEach((header) => {
+//       table += <td>${row[header]}</td>;
+//     });
+//     table += "</tr>";
+//   });
+
+//   table += "</tbody></table>";
+//   document.getElementById(containerId).innerHTML = table;
+// }
+
 // Show message function
-function showMessage(message, isError = false) {
+function showMessage(containerId, message, isError = false) {
   const messageDiv = document.createElement("div");
   messageDiv.className = isError ? "error-message" : "success-message";
   messageDiv.textContent = message;
 
-  const container = document.querySelector(".modal-content");
-  container.appendChild(messageDiv);
+  // const container = document.querySelector(".modal-content");
+  // console.log(container);
+  // console.log(container.children);
+  console.log(containerId);
+  const cont = document.getElementById(containerId);
+  console.log(cont);
+  cont.appendChild(messageDiv);
 
   setTimeout(() => {
     messageDiv.remove();
-  }, 3000);
+  }, 5000);
 }
 
 // Close modal when clicking outside
