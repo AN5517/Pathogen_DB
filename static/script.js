@@ -27,19 +27,6 @@ function createTable(data, containerId) {
   document.getElementById(containerId).innerHTML = table;
 }
 
-// Show message function
-// function showMessage(containerId, message, isError = false) {
-//   console.log("got called with: ");
-//   console.log(containerId);
-
-//   const messageDiv = document.getElementById(containerId);
-//   messageDiv.textContent = message;
-//   messageDiv.className = `message ${isError ? "error" : "success"}`;
-//   setTimeout(() => {
-//     messageDiv.className = "message";
-//   }, 10000);
-// }
-
 // Load High Risk Pathogens
 async function loadHighRiskPathogens() {
   const threshold = document.getElementById("mutationThreshold").value;
@@ -282,104 +269,6 @@ async function loadProjectSuccess() {
   }
 }
 
-// Update Vaccine Effectiveness
-// async function updateVaccineEffectiveness() {
-//   const vaccineId = document.getElementById("vaccineId").value;
-//   const effectiveness = document.getElementById("vaccineEffectiveness").value;
-
-//   try {
-//     const response = await fetch("/api/update_vaccine_effectiveness", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         vaccine_id: vaccineId,
-//         effectiveness: effectiveness,
-//       }),
-//     });
-
-//     const result = await response.json();
-//     showMessage(
-//       // "vaccineUpdateMessage",
-//       result.message,
-//       result.status === "error"
-//     );
-//   } catch (error) {
-//     showMessage(
-//       // "vaccineUpdateMessage",
-//       "Failed to update vaccine effectiveness",
-//       true
-//     );
-//   }
-// }
-
-// Update Project Status
-// async function updateProjectStatus() {
-//   const projectId = document.getElementById("projectId").value;
-//   const status = document.getElementById("projectStatus").value;
-
-//   try {
-//     const response = await fetch("/api/update_project_status", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         project_id: projectId,
-//         status: status,
-//         end_date:
-//           status === "completed"
-//             ? new Date().toISOString().split("T")[0]
-//             : null,
-//       }),
-//     });
-
-//     const result = await response.json();
-//     showMessage(
-//       // "projectUpdateMessage",
-//       result.message,
-//       result.status === "error"
-//     );
-//   } catch (error) {
-//     showMessage(
-//       // "projectUpdateMessage",
-//       "Failed to update project status",
-//       true
-//     );
-//   }
-// }
-
-// Update Lab Funding
-// async function updateLabFunding() {
-//   const labId = document.getElementById("labId").value;
-//   const fundingChange = document.getElementById("fundingChange").value;
-
-//   try {
-//     const response = await fetch("/api/update_lab_funding", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({
-//         lab_id: labId,
-//         funding_change: fundingChange,
-//       }),
-//     });
-
-//     const result = await response.json();
-//     showMessage(
-//       // "labUpdateMessage", 
-//       result.message, 
-//       result.status === "error");
-//   } catch (error) {
-//     showMessage(
-//       // "labUpdateMessage", 
-//       "Failed to update lab funding", 
-//       true);
-//   }
-// }
-
 // Add event listener when document loads
 document.addEventListener("DOMContentLoaded", function () {
   const cards = document.querySelectorAll(".card");
@@ -616,35 +505,6 @@ async function loadAnalysis(type) {
       '<p class="error-message">Error loading analysis results.</p>';
   }
 }
-
-// Utility function to create tables from JSON data
-// function createTable(data, containerId) {
-//   if (data.length === 0) {
-//     document.getElementById(containerId).innerHTML = "<p>No data available</p>";
-//     return;
-//   }
-
-//   const headers = Object.keys(data[0]);
-//   let table = "<table><thead><tr>";
-
-//   // Create headers
-//   headers.forEach((header) => {
-//     table += <th>${header.replace(/_/g, " ").toUpperCase()}</th>;
-//   });
-//   table += "</tr></thead><tbody>";
-
-//   // Create rows
-//   data.forEach((row) => {
-//     table += "<tr>";
-//     headers.forEach((header) => {
-//       table += <td>${row[header]}</td>;
-//     });
-//     table += "</tr>";
-//   });
-
-//   table += "</tbody></table>";
-//   document.getElementById(containerId).innerHTML = table;
-// }
 
 // Show message function
 function showMessage(containerId, message, isError = false) {
