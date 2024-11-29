@@ -1,11 +1,22 @@
 import pymysql
 
-db = pymysql.connect(
-    host="localhost",
-    user="root",
-    password="agn1705mY5ql",
-    database="pathogen"
-)
+from cred import mysqlpw, mysqluser
+
+
+try:
+    db = pymysql.connect(
+        host="localhost",
+        user=mysqluser,
+        password=mysqlpw,
+        database="pathogen"
+    )
+except:
+    db = pymysql.connect(
+        host="localhost",
+        user=mysqluser,
+        password=mysqlpw
+    )
+    db.cursor().execute("CREATE DATABASE IF NOT EXISTS pathogen")
 
 cursor = db.cursor()
 
