@@ -314,41 +314,6 @@ const tables = [
   "Vaccine_distribution_cost",
 ];
 
-// Initialize the page
-document.addEventListener("DOMContentLoaded", function () {
-  // Populate table dropdowns
-  const tableSelects = ["insert-table", "update-table", "delete-table"];
-  tableSelects.forEach((selectId) => {
-    const select = document.getElementById(selectId);
-    tables.forEach((table) => {
-      const option = document.createElement("option");
-      option.value = table;
-      option.textContent = table.replace(/_/g, " ");
-      select.appendChild(option);
-    });
-  });
-
-  // Populate table dropdowns for update and delete
-  fetch("/api/tables")
-    .then((response) => response.json())
-    .then((tables) => {
-      const updateTableSelect = document.getElementById("update-table");
-      const deleteTableSelect = document.getElementById("delete-table");
-
-      tables.forEach((table) => {
-        const updateOption = document.createElement("option");
-        updateOption.value = table;
-        updateOption.textContent = table;
-        updateTableSelect.appendChild(updateOption);
-
-        const deleteOption = document.createElement("option");
-        deleteOption.value = table;
-        deleteOption.textContent = table;
-        deleteTableSelect.appendChild(deleteOption);
-      });
-    });
-});
-
 // Modal functions
 function openModal(modalId) {
   document.getElementById(modalId).style.display = "block";
@@ -474,7 +439,6 @@ async function handleFormSubmit(event, operation, table, containerId) {
   }
 }
 
-// Load analysis results
 // Load analysis results
 async function loadAnalysis(type) {
   const resultsContainer = document.getElementById("analysis-results");
@@ -623,50 +587,25 @@ async function fetchTableData(table) {
 }
 
 async function loadTableOptions() {
-  try {
-    const response = await fetch("/api/tables");
-    const tables = await response.json();
+  // Populate table dropdowns for insert, update and delete
+  const tableSelects = ["insert-table", "update-table", "delete-table", "read-table", "search-table", "selection-table", "projection-table", "aggregation-table"];
 
-    const select = document.getElementById("read-table");
-    tables.forEach((table) => {
-      const option = document.createElement("option");
-      option.value = table;
-      option.textContent = table;
-      select.appendChild(option);
-    });
-  } catch (error) {
-    console.error("Error loading table options:", error);
-  }
+  fetch("/api/tables")
+  .then((response) => response.json())
+  .then((tables) => {
+    tableSelects.forEach((selectId) => {
+      const select = document.getElementById(selectId);
+      tables.forEach((table) => {
+          const option = document.createElement("option");
+          option.value = table;
+          option.textContent = table.replace(/_/g, " ");
+          select.appendChild(option);
+        })
+      })
+  });
 }
 
 document.addEventListener("DOMContentLoaded", loadTableOptions);
-
-document.addEventListener("DOMContentLoaded", function () {
-  const selectionTableSelect = document.getElementById("selection-table");
-  const projectionTableSelect = document.getElementById("projection-table");
-  const aggregationTableSelect = document.getElementById("aggregation-table");
-  const searchTableSelect = document.getElementById("search-table");
-
-  fetch("/api/tables")
-    .then((response) => response.json())
-    .then((tables) => {
-      const selectElements = [
-        selectionTableSelect,
-        projectionTableSelect,
-        aggregationTableSelect,
-        searchTableSelect,
-      ];
-
-      selectElements.forEach((select) => {
-        tables.forEach((table) => {
-          const option = document.createElement("option");
-          option.value = table;
-          option.textContent = table;
-          select.appendChild(option);
-        });
-      });
-    });
-});
 
 function loadSelectionOptions(table) {
   fetch(`/api/tables/columns?table=${table}`)

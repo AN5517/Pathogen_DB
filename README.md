@@ -24,7 +24,11 @@ Nice! Installed!
 
 First time initialization:
 
+You have to follow these instructions only once before running the code for the first time (recommended everytime you pull from GitHub).
+
 - Ensure that your MySQL server is up and running.
+
+- Ensure that a database named `pathogen`, if one exists, doesn't conflict with our table structures, or it could cause conflicts  during initialization below.
 
 - Run `table_population.py` by executing `python table_population.py` (or `py table_population.py` or whatever works).
 
